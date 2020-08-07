@@ -15,9 +15,8 @@
         <connectCard v-on:openChat="openChat" v-for="(detail,index) in chatList" :key="index" :detail="detail"></connectCard>
       </div>
       <div class="chatRoom">
-        
+        <div class="chatHeader">群聊名字</div>
         <div class="msgs" id='homeIm' @scroll="scrollEvent" ref='chatBox'>
-               <div class="chatHeader"><div style="line-height:50px">群聊名字</div></div>
           <div class="loadHistory">
             <span class="loadHistory-t" @click="loadHis()">{{haveHis?'加载历史记录':'没有历史记录了'}}</span>
           </div>
@@ -25,7 +24,8 @@
         </div>
         <div class="inpOp">
            <div class="inpTool"><span class="images" ><img style="width:28px; height:28px"  :src="flag?one:two"  @mouseover="flag=!flag"  @mouseout="flag=!flag" alt=""></span> 
-              <span   class="images" ><img  style="display:block"   class="imag" :src="fleg?ones:twos"  @click="active(index)" @mouseover="fleg=!fleg" @mouseout="fleg=!fleg"   alt=""></span>
+              <span   class="images" ><img  style="display:block"   class="imag" :src="fleg?ones:twos"  @click="chenge(src)" @mouseover="fleg=!fleg" @mouseout="fleg=!fleg"   alt="">
+              </span>
            </div>
           <!-- <div class="inpTool"><span class="images" ><img style="width:28px; height:28px"  :src="topimgs"  @click="back()" alt=""></span> </div> -->
           <textarea v-on:keyup.enter="send"  style="resize:none;"  class="inpEnter" v-model="say" placeholder="请输入内容..." />
@@ -45,6 +45,7 @@ import homeNews from './homeNews'
 import connectCard from './connectCard'
 import b1 from '../assets/images/B1.png'
 import b2 from '../assets/images/B2.png'
+import b3 from '../assets/images/B3.png'
 import imga from '../assets/picture_chose.png'
 import imgb from '../assets/picture_unchose.png'
 // const arr = [ Field ,Button];
@@ -63,6 +64,7 @@ export default {
       two:require('../assets/picture_chose.png'),
       ones:require('../assets/images/B1.png'),   
       twos:require('../assets/images/B2.png'),
+      thiere:require('../assets/images/B3.png'),
       chatList:[],//会话列表
       say:'',
       nowChat:null,//当前对话框对象
@@ -121,6 +123,9 @@ export default {
     },
   },
   methods: {
+    chenge(src){
+      console.log(src)
+    },
     back(){
       if(this.topimgs=imga){
         this.topimgs=imgb
@@ -315,7 +320,7 @@ export default {
 <style scoped>
 .chatHeader{
   text-align: center;
-  background: greenyellow;
+  background: cadetblue;
   height: 50px;
 
 }

@@ -114,7 +114,7 @@ created () { //生命周期函数-可发起求
         const self=this;
     //自己的token------从接口获取，写到缓存
       // var token = JSON.parse(localStorage.getItem('userInfo')).IMUser.token//"WzrthC5f4UfuiI7dIwCQ5fwtGfqCdobpowIZkcQnj8PQOQuAJb/nIi1ayzGFwJguvbQZxbJH3x0=";
-      RongIMClient.connect('3WTiXhKR5XDfXNTgTGG/lzEjnbrN85NeXqZ7V0vGGJ4=@zeph.cn.rongnav.com;zeph.cn.rongcfg.com', {
+      RongIMClient.connect('lFLCTdymLem/eleH16XcVGqWa1TUI8otXuWvIK0HUgo=@zeph.cn.rongnav.com;zeph.cn.rongcfg.com', {
           onSuccess: function(userId) {
               console.log('Connect successfully. ' + userId);
               self.$store.state.isConnect=true;
