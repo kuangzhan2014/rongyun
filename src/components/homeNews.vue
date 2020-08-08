@@ -2,7 +2,7 @@
   <div class="homeNews">
       <!-- 1:文字，2：红包，3：文章 ,css:类型 -->
       <div class="right" v-if="data.messageType =='TextMessage'&&data.messageDirection=='1'">
-         <div class="right-head"></div>
+         <div class="right-head"><img class="right-head-img" :src="rightHeadImageUrl"></div>
          <div class="right-con">
            <div class="getName">用户名1</div>
            <div class="content">{{data.content.content}}</div>
@@ -29,6 +29,8 @@ export default {
   data() {
     return {
       time:'',
+      rightHeadImageUrl:require('../assets/images/person1.png'),
+      leftHeadImageUrl:require('../assets/images/person2.png')
     };
   },
   created() {
@@ -55,8 +57,11 @@ export default {
 .right-head{
   width: 80px;
   height: 80px;
-  background: lightcoral;
-  border-radius:50%; 
+}
+.right-head-img{
+    width: 100%;
+    height: 100%;
+    border-radius:50%;
 }
 .right-con{
   max-width:600px;

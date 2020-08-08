@@ -6,7 +6,7 @@
     </div>
     <div class="con-box">
       <div class="con-nav">
-        <div class="con-nav-head"></div>
+        <div class="con-nav-head"><img src=></div>
       </div>
       <div class="chatList">
         <div class="search">

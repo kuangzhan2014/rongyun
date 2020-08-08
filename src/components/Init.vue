@@ -6,7 +6,7 @@
     </div>
     <div class="con-box">
       <div class="con-nav">
-        <div class="con-nav-head"></div>
+        <div class="con-nav-head"><img class="con-head-img" :src="headImageUrl" ></div>
       </div>
       <div class="chatList">
         <div class="search">
@@ -33,7 +33,6 @@
         </div>
       </div>
     </div>
-
     
   </div>
 </template>
@@ -69,6 +68,8 @@ export default {
       targetMan:'',//目前会话框的对象
       hisObj:[],//历史记录大对象
       haveHis:true,//该会话是否还有历史记录
+      // headImageUrl:JSON.parse(localStorage.getItem('userInfo')).portrait_url
+      headImageUrl:require('../assets/images/person1.png')
     };
   },
   name: "homeIm",
@@ -341,6 +342,11 @@ export default {
   box-sizing: border-box;
   display: flex;
   align-items: center;
+}
+.con-head-img{
+  width: 100%;
+  height: 100%;
+  border-radius:50%
 }
 .con-head-m{
   width: 50px;
