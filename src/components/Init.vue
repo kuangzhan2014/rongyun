@@ -17,15 +17,22 @@
       <div class="chatRoom">
         
         <div class="msgs" id='homeIm' @scroll="scrollEvent" ref='chatBox'>
-               <div class="chatHeader"><div style="line-height:50px">群聊名字</div></div>
+               <div class="chatHeader"><div class="chattext" style="line-height:50px">群聊名字</div></div>
           <div class="loadHistory">
             <span class="loadHistory-t" @click="loadHis()">{{haveHis?'加载历史记录':'没有历史记录了'}}</span>
           </div>
           <homeNews v-for="(item ,index) in answer" :key='index' :item='item' :data='item'></homeNews>
         </div>
         <div class="inpOp">
-           <div class="inpTool"><span class="images" ><img style="width:28px; height:28px"  :src="flag?one:two"  @mouseover="flag=!flag"  @mouseout="flag=!flag" alt=""></span> 
-              <span   class="images" ><img  style="display:block"   class="imag" :src="fleg?ones:twos"  @click="active(index)" @mouseover="fleg=!fleg" @mouseout="fleg=!fleg"   alt=""></span>
+           <div class="inpTool">
+             <!-- 点击上传文件 -->
+             <label for="fileInput">
+               <span class="images" ><img style="width:28px; height:28px"  :src="flag?one:two"  @mouseover="flag=!flag"  @mouseout="flag=!flag" alt=""></span> 
+             </label>
+             <input v-show="false" type="file" id="fileInput" style=" opacity: 0;">
+           <!-- <span class="btn" :class="{active: shows==1}" @click="change" >报价</span> -->
+              <span   class="images"  id="bgimg" ><img  style="display:block"  v-show="isShow"  class="imag" :src="fleg?ones:twos"  @click="change()"   @mouseover="fleg=!fleg" @mouseout="fleg=!fleg"   alt=""></span>
+                <!-- <span   class="images" ><img  style="display:block"   class="imag" :src="'../assets/images/'+n+'.png'"  @click="tab(n)"  alt=""></span> -->
            </div>
           <!-- <div class="inpTool"><span class="images" ><img style="width:28px; height:28px"  :src="topimgs"  @click="back()" alt=""></span> </div> -->
           <textarea v-on:keyup.enter="send"  style="resize:none;"  class="inpEnter" v-model="say" placeholder="请输入内容..." />
@@ -56,6 +63,9 @@ import imgb from '../assets/picture_unchose.png'
 export default {
   data() {
     return { 
+      isShow:true,
+      shows:0,
+      nowIndex:0,
       topimgs:imga,
       flag:true,
       fleg:true,
@@ -63,6 +73,7 @@ export default {
       two:require('../assets/picture_chose.png'),
       ones:require('../assets/images/B1.png'),   
       twos:require('../assets/images/B2.png'),
+      thrs:require('../assets/images/B3.png'),
       chatList:[],//会话列表
       say:'',
       nowChat:null,//当前对话框对象
@@ -121,6 +132,24 @@ export default {
     },
   },
   methods: {
+    // openFileIIs(filename){  ///ActiveXObject 访问本地文件系统或应用程序  出错
+    //     try{ 
+    //         var obj=new ActiveXObject("wscript.shell"); 
+    //         if(obj){ 
+    //             obj.Run("\""+filename+"\"", 1, false );
+    //             //obj.run("osk");/*打开屏幕键盘*/
+    //             //obj.Run('"'+filename+'"'); 
+    //             obj=null; 
+    //         } 
+    //     }catch(e){ 
+    //        console.log('输出错误')
+    //     } 
+        
+
+    // },
+    change(){
+         this.shows = 1
+       },
     back(){
       if(this.topimgs=imga){
         this.topimgs=imgb
@@ -313,6 +342,9 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.active{
+  background: #eff4f7;
+ }
 .chatHeader{
   text-align: center;
   background: greenyellow;
@@ -320,7 +352,17 @@ export default {
 
 }
 .btn{
-  top: 10px;
+  border: none;
+  border: 1px solid green;
+  color: green;
+  border-radius: 6px;
+  width: 56px;
+  height: 24px;
+  line-height: 22px;
+  cursor: pointer;
+  top: 6px;
+  left: 60px;
+  text-align: center;
   position: absolute;
 }
 .con{
@@ -424,6 +466,7 @@ export default {
   flex-shrink: 0;
 }
 .inpTool{
+  position: relative;
   width: 100%;
   height: 34px;
   background: white;
@@ -455,8 +498,15 @@ export default {
 }
 .images{
   display:inline-block;
-  padding-left: 10px;
+  padding-left: 20px;
   padding-top: 4px;
+}
+#bgimg{
+  background-image: url('../assets/images/B1.png')no-repeat;
+  display:inline-block;
+  padding-left: 20px;
+  padding-top: 4px;
+
 }
 </style>
 
