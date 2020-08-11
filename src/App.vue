@@ -10,6 +10,7 @@ import { mapState } from 'vuex'
 import { mapGetters } from 'vuex'
 import { mapMutations } from 'vuex'
 import axios from 'axios'
+import Global from "./common/Global";
 export default {
   name: 'app',
   components: {
@@ -18,13 +19,14 @@ export default {
   data(){
     return{
       token:'',
-      userInfo:[]
+      userInfo:[],
     }
   },
 created () { //生命周期函数-可发起求
     let that = this
     //融云初始化8w7jv4qb78a9y
     //自己的pvxdm17jpe59r
+
     RongIMLib.RongIMClient.init('pvxdm17jpe59r',); //------------------------------重要填写appkey
     that.beforeIm() //设置监听，必须先设置监听，再连接
     that.nowIm()  //连接融云
@@ -120,7 +122,7 @@ created () { //生命周期函数-可发起求
     nowIm(){
         const self=this;
     //自己的token------从接口获取，写到缓存
-      let userId = 20000001
+      let userId = 1
       let url = '/api/IM/getUserInfo/'+userId;
       axios.get(url).then(function (response) {
         console.log("获取用户信息成功");
@@ -128,10 +130,17 @@ created () { //生命周期函数-可发起求
         if(response.status === 200){
           //获得成功响应返回的数据
           let userInfo=response.data.ReturnData[0];
-          // console.log(userInfo.ry_token);
-          //将用户信息转化为字符串写入缓存
-          localStorage.setItem('userInfo',JSON.stringify(userInfo));
-          // console.log(JSON.parse(localStorage.getItem('userInfo')).ry_token);
+          if(response.data.ReturnTotalRecords===0){
+            Global.isTokenNull=true;
+          }
+            if(Global.isTokenNull){
+            console.log("token为空,请注册");
+          }else{
+            // console.log(userInfo.ry_token);
+            //将用户信息转化为字符串写入缓存
+            localStorage.setItem('userInfo',JSON.stringify(userInfo));
+            // console.log(JSON.parse(localStorage.getItem('userInfo')).ry_token);
+          }
         }
       }).catch(function (error) {
             console.log(error);

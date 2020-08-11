@@ -29,7 +29,8 @@ export default {
   data() {
     return {
       time:'',
-      rightHeadImageUrl:require('../assets/images/person1.png'),
+        rightHeadImageUrl:decodeURIComponent(JSON.parse(localStorage.getItem('userInfo')).portrait_url),
+      // rightHeadImageUrl:require('../assets/images/person1.png'),
       leftHeadImageUrl:require('../assets/images/person2.png')
     };
   },

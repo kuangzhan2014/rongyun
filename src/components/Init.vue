@@ -10,7 +10,7 @@
       </div>
       <div class="chatList">
         <div class="search">
-          <input class="search-1" type="text" placeholder="请输入搜索内容">
+          <input class="search-1" type="text" placeholder="请输入搜索内容并按回车键结束" @keyup.enter="getSearchChat()" ref="searchContent">
         </div>
         <connectCard v-on:openChat="openChat" v-for="(detail,index) in chatList" :key="index" :detail="detail"></connectCard>
       </div>
@@ -65,11 +65,13 @@ export default {
       chatList:[],//会话列表
       say:'',
       nowChat:null,//当前对话框对象
-      targetMan:'',//目前会话框的对象
+      targetMan:10,//目前会话框的对象
       hisObj:[],//历史记录大对象
       haveHis:true,//该会话是否还有历史记录
-      // headImageUrl:JSON.parse(localStorage.getItem('userInfo')).portrait_url
-      headImageUrl:require('../assets/images/person1.png')
+      headImageUrl:decodeURIComponent(JSON.parse(localStorage.getItem('userInfo')).portrait_url),
+      // headImageUrl:require('../assets/images/person1.png'),
+      searchContent:'',
+      userId:JSON.parse(localStorage.getItem('userInfo')).UserId
     };
   },
   name: "homeIm",
@@ -116,6 +118,7 @@ export default {
     isConnect(newVal){
       console.log('组件中监听链接是否成功',newVal)
       if(newVal){  //全局监听融云连接成功
+        console.log(111)
         this.getChat()//获取会话列表，要钱
         // this.getChatRecord() //获取指定会话聊天记录，要钱        
       }
@@ -294,7 +297,7 @@ export default {
     },
     getChatRecord(){  //获取指定会话历史
       let conversationType = RongIMLib.ConversationType.PRIVATE; //单聊, 其他会话选择相应的消息类型即可
-      let targetId = '2'; // 想获取自己和谁的历史消息，targetId 赋值为对方的 Id
+      let targetId = ''; // 想获取自己和谁的历史消息，targetId 赋值为对方的 Id
       let timestrap = null; // 默认传 null，若从头开始获取历史消息，请赋值为 0, timestrap = 0;
       let count = 20; // 每次获取的历史消息条数，范围 0-20 条，可以多次获取
       RongIMLib.RongIMClient.getInstance().getHistoryMessages(conversationType, targetId, timestrap, count, {
@@ -307,7 +310,26 @@ export default {
               console.log('GetHistoryMessages, errorcode:' + error);
           }
       });
-    }
+    },
+    getSearchChat(){  //搜索会话
+      this.searchContent = this.$refs.searchContent.value;
+      // if(searchContent)
+      console.log(this.searchContent);
+      axios.get('/api/Im/getlist',{
+        params:{
+          userId:this.userId,
+          searchContent:this.searchContent
+        }
+      }).then(function (response) {
+        if(response.status === 200){
+          //获得成功响应返回的数据
+
+        }
+      }).catch(function (error) {
+        console.log(error);
+      });
+    },
+
   },
 };
 </script>

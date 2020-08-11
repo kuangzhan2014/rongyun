@@ -4,10 +4,11 @@ import router from './router'
 import store from './store'
 import Vuex from 'vuex'
 import axios from 'axios'
+import Global from "./common/Global";
 
 Vue.config.productionTip = false
 // Vue.prototype.$baseUrl = 'http://tst.im.lineji.cn'
-
+Vue.prototype.Global = Global
 
 Vue.use(Vuex);
 new Vue({
