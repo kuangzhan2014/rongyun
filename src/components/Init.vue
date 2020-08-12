@@ -17,7 +17,9 @@
       <div class="chatRoom">
         
         <div class="msgs" id='homeIm' @scroll="scrollEvent" ref='chatBox'>
-               <div class="chatHeader"><div class="chattext" style="line-height:50px">群聊名字</div></div>
+               <div class="chatHeader"><div class="chattext" style="line-height:50px">群聊名字    <select name="" id="">
+                 <option value="id1">id1</option>
+                 <option value="id2">id2</option></select></div></div>
           <div class="loadHistory">
             <span class="loadHistory-t" @click="loadHis()">{{haveHis?'加载历史记录':'没有历史记录了'}}</span>
           </div>
@@ -62,6 +64,8 @@ import imgb from '../assets/picture_unchose.png'
 export default {
   data() {
     return { 
+      id1:'20000001',
+      id2:'20000002',
       isShow:true,
       shows:0,
       nowIndex:0,
@@ -76,7 +80,7 @@ export default {
       chatList:[],//会话列表
       say:'',
       nowChat:null,//当前对话框对象
-      targetMan:'',//目前会话框的对象
+      targetMan:JSON.parse(localStorage.getItem('targetId')),//目前会话框的对象
       hisObj:[],//历史记录大对象
       haveHis:true,//该会话是否还有历史记录
       // headImageUrl:JSON.parse(localStorage.getItem('userInfo')).portrait_url
@@ -113,6 +117,7 @@ export default {
         'isConnect'
     ]),    
     getIsConnect() {
+      console.log(1234234)
       return this.$store.state.isConnect;
     }
   },
@@ -127,8 +132,11 @@ export default {
     isConnect(newVal){
       console.log('组件中监听链接是否成功',newVal)
       if(newVal){  //全局监听融云连接成功
+      console.log(1111111)
         this.getChat()//获取会话列表，要钱
-        // this.getChatRecord() //获取指定会话聊天记录，要钱        
+              console.log(222222222)
+        this.getChatRecord() //获取指定会话聊天记录，要钱       
+              console.log(33333333) 
       }
     },
   },
@@ -202,7 +210,8 @@ export default {
       RongIMClient.getInstance().sendMessage(conversationType, targetId, msg, {
           onSuccess: function (message) {
               // message 为发送的消息对象并且包含服务器返回的消息唯一 Id 和发送消息时间戳
-              console.log('Send successfully',message,message.content.content);
+              console.log('Send successfully',message,message.content.content,message.senderUserId);
+              console.log(message.targetId)
               that.answer.push(message,message.content.content)
               that.say = ''
               that.toBottom();
@@ -322,8 +331,9 @@ export default {
         });        
     },
     getChatRecord(){  //获取指定会话历史
+      console.log(1231231)
       let conversationType = RongIMLib.ConversationType.PRIVATE; //单聊, 其他会话选择相应的消息类型即可
-      let targetId = '2'; // 想获取自己和谁的历史消息，targetId 赋值为对方的 Id
+      let targetId = this.targetId; // 想获取自己和谁的历史消息，targetId 赋值为对方的 Id
       let timestrap = null; // 默认传 null，若从头开始获取历史消息，请赋值为 0, timestrap = 0;
       let count = 20; // 每次获取的历史消息条数，范围 0-20 条，可以多次获取
       RongIMLib.RongIMClient.getInstance().getHistoryMessages(conversationType, targetId, timestrap, count, {
