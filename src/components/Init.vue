@@ -12,6 +12,7 @@
         <div class="search">
           <input class="search-1" type="text" placeholder="请输入搜索内容">
         </div>
+        <!-- 组件connectCard -->
         <connectCard v-on:openChat="openChat" v-for="(detail,index) in chatList" :key="index" :detail="detail"></connectCard>
       </div>
       <div class="chatRoom">
@@ -21,14 +22,28 @@
           <div class="loadHistory">
             <span class="loadHistory-t" @click="loadHis()">{{haveHis?'加载历史记录':'没有历史记录了'}}</span>
           </div>
+          <!-- 组件homeNews -->
           <homeNews v-for="(item ,index) in answer" :key='index' :item='item' :data='item'></homeNews>
         </div>
         <div class="inpOp">
-           <div class="inpTool"><span class="images" ><img style="width:28px; height:28px"  :src="flag?one:two"  @mouseover="flag=!flag"  @mouseout="flag=!flag" alt=""></span> 
-              <span   class="images" ><img  style="display:block"   class="imag" :src="fleg?ones:twos"  @click="active(index)" @mouseover="fleg=!fleg" @mouseout="fleg=!fleg"   alt=""></span>
+         
+           <div class="inpTool">
+             <!-- 点击上传文件 -->
+             <label for="fileInput">
+               <span class="images" ><img style="width:28px; height:28px"  :src="flag?one:two"  @mouseover="flag=!flag"  @mouseout="flag=!flag" alt=""></span> 
+             </label>
+             <input v-show="false" type="file" id="fileInput" style=" opacity: 0;">
+           <!-- <span class="btn" :class="{active: shows==1}" @click="change" >报价</span> -->
+              <span   class="images"  id="bgimg" ><img  style="display:block"  v-show="isShow"  class="imag" :src="fleg?ones:twos"     @click="fleg=!fleg"    alt=""></span>
+                <!-- <span   class="images" ><img  style="display:block"   class="imag" :src="'../assets/images/'+n+'.png'"  @click="tab(n)"  alt=""></span> -->
            </div>
           <!-- <div class="inpTool"><span class="images" ><img style="width:28px; height:28px"  :src="topimgs"  @click="back()" alt=""></span> </div> -->
-          <textarea v-on:keyup.enter="send"  style="resize:none;"  class="inpEnter" v-model="say" placeholder="请输入内容..." />
+            <!-- <div class="img-textarea" @paste="descImgPaste($event)" contenteditable="true"  v-on:keyup.enter="send"  ></div> -->
+            <div  placeholder="请输入内容"  class="inpEnter" contenteditable="true" v-html="say" @input="inputDiv($event)" 
+             v-on:keyup.enter="send" style="resize:none;" > </div>
+
+          <!-- <textarea  id="textarea" v-on:keyup.enter="send"  ref="msg" style="resize:none;"  class="inpEnter" v-model="say" placeholder="请输入内容..."  /> -->
+          
           <button class="sendBtn"  @click="send" :disabled ='say?false:true'>发送</button>
         </div>
       </div>
@@ -55,13 +70,14 @@ import imgb from '../assets/picture_unchose.png'
 export default {
   data() {
     return { 
+      isShow:true,
       topimgs:imga,
       flag:true,
       fleg:true,
       one:require('../assets/picture_unchose.png'),   
       two:require('../assets/picture_chose.png'),
       ones:require('../assets/images/B1.png'),   
-      twos:require('../assets/images/B2.png'),
+      twos:require('../assets/images/B3.png'),
       chatList:[],//会话列表
       say:'',
       nowChat:null,//当前对话框对象
@@ -69,7 +85,7 @@ export default {
       hisObj:[],//历史记录大对象
       haveHis:true,//该会话是否还有历史记录
       // headImageUrl:JSON.parse(localStorage.getItem('userInfo')).portrait_url
-      headImageUrl:require('../assets/images/person1.png')
+      headImageUrl:require('../assets/images/person2.png')
     };
   },
   name: "homeIm",
@@ -81,6 +97,7 @@ export default {
     connectCard
   },
   created() {
+    console.log(this.$store)
     console.log('组件初始化中是否链接上了',this.$store.state.isConnect)
     if(this.$store.state.isConnect){
       this.getChat()
@@ -93,6 +110,7 @@ export default {
         document.documentElement.scrollTop = list.scrollHeight
         //如不行，请尝试->  list.scrollTop = list.scrollHeight
       })
+      
   },
   computed:{
     ...mapState({
@@ -120,8 +138,71 @@ export default {
         // this.getChatRecord() //获取指定会话聊天记录，要钱        
       }
     },
+    say(newvalue) {
+       this.keepLastIndex(this.$refs.msg);
+      // console.log(newvalue);
+      // // if (!this.isLocked && !this.innerText) {
+      // if (!newvalue) {
+      //   // 清空节点内所有html来清空文本
+      //   this.$refs.msg.innerHTML = '';
+      // } else {
+      //   this.keepLastIndex(this.$refs.msg);
+      // }
+    } ,
+  },
+  mounted:function(){
+    this.copy()
   },
   methods: {
+    copy(){
+        document.addEventListener('paste', function(event){
+    if (event.clipboardData || event.originalEvent) {
+     var clipboardData = (event.clipboardData || event.originalEvent.clipboardData);
+     if(clipboardData.items){
+      var blob;
+      for (var i = 0; i < clipboardData.items.length; i++) {
+       if (clipboardData.items[i].type.indexOf("image") !== -1) {
+        blob = clipboardData.items[i].getAsFile();
+       }
+      }
+      var render = new FileReader();
+      render.onload = function (evt) {
+       //输出base64编码
+       var base64 = evt.target.result;
+       document.getElementById('img').setAttribute('src',base64);
+      }
+      render.readAsDataURL(blob);
+     }
+  
+    }
+  
+   })
+    },
+    keepLastIndex(obj) {
+      if (window.getSelection) {
+        //ie11 10 9 ff safari
+        // obj.focus(); //解决ff不获取焦点无法定位问题
+        var range = window.getSelection(); //创建range
+        range.selectAllChildren(obj); //range 选择obj下所有子内容
+        range.collapseToEnd(); //光标移至最后
+      } else if (document.selection) {
+        //ie10 9 8 7 6 5
+        var range = document.selection.createRange(); //创建选择对象
+        //var range = document.body.createTextRange();
+        range.moveToElementText(obj); //range定位到obj
+        range.collapse(false); //光标移至最后
+        range.select();
+      }
+      
+    },
+
+
+    //文本框内容
+     inputDiv:function(e){
+      this.say = e.target.innerHTML;
+      console.log('Text: %o', this.say)
+
+    },
     back(){
       if(this.topimgs=imga){
         this.topimgs=imgb
@@ -206,7 +287,7 @@ export default {
     },
     getChat(){ //获取会话列表
       let self=this;
-      let conversationType = RongIMLib.ConversationType.PRIVATE; //单聊, 其他会话选择相应的消息类型即可
+      let conversationType = RongIMLib.ConversationType.PRIVATE; //单聊, 其他会话选择相应的消息类型即可  消息类型
       RongIMClient.getInstance().getConversationList({
           onSuccess: function(list) {
               // list => 会话列表集合
@@ -435,6 +516,8 @@ export default {
   background: white;
 }
 .inpEnter{
+  
+  min-height: 17px;
   width: 100%;
   flex: 1;
   border: none;
@@ -463,6 +546,14 @@ export default {
   display:inline-block;
   padding-left: 10px;
   padding-top: 4px;
+}
+.img-textarea{
+   width: 100%;
+  flex: 1;
+  border: none;
+  outline: none;
+  padding:15px;
+  box-sizing: border-box;
 }
 </style>
 

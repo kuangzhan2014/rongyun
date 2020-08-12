@@ -120,7 +120,7 @@ created () { //生命周期函数-可发起求
     nowIm(){
         const self=this;
     //自己的token------从接口获取，写到缓存
-      let userId = 20000001
+      let userId = 2
       let url = '/api/IM/getUserInfo/'+userId;
       axios.get(url).then(function (response) {
         console.log("获取用户信息成功");
