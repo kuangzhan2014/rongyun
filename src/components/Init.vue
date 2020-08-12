@@ -14,26 +14,28 @@
         </div>
         <connectCard v-on:openChat="openChat" v-for="(detail,index) in chatList" :key="index" :detail="detail"></connectCard>
       </div>
-      <div class="chatRoom">
-        
-        <div class="msgs" id='homeIm' @scroll="scrollEvent" ref='chatBox'>
-               <div class="chatHeader"><div style="line-height:50px">群聊名字</div></div>
-          <div class="loadHistory">
-            <span class="loadHistory-t" @click="loadHis()">{{haveHis?'加载历史记录':'没有历史记录了'}}</span>
-          </div>
-          <homeNews v-for="(item ,index) in answer" :key='index' :item='item' :data='item'></homeNews>
-        </div>
-        <div class="inpOp">
-           <div class="inpTool"><span class="images" ><img style="width:28px; height:28px"  :src="flag?one:two"  @mouseover="flag=!flag"  @mouseout="flag=!flag" alt=""></span> 
+      <div class="chatRoom" >
+        <img class="background-img" :src="backgroundImg" v-show="showBackgroundImg" >
+        <div class="chatRoom"  v-show="showChat" >
+            <div class="chatHeader">群聊名字</div>
+            <div class="chatContent" id='homeIm' @scroll="scrollEvent" ref='chatBox'>
+              <div class="loadHistory">
+                <span class="loadHistory-t" @click="loadHis()">{{haveHis?'加载历史记录':'没有历史记录了'}}</span>
+              </div>
+             <homeNews v-for="(item ,index) in answer" :key='index' :item='item' :data='item'></homeNews>
+            </div>
+            <div class="inpOp">
+           <div class="inpTool"><span class="images" ><img style="width:28px; height:28px"  :src="flag?one:two"  @mouseover="flag=!flag"  @mouseout="flag=!flag" alt=""></span>
               <span   class="images" ><img  style="display:block"   class="imag" :src="fleg?ones:twos"  @click="active(index)" @mouseover="fleg=!fleg" @mouseout="fleg=!fleg"   alt=""></span>
            </div>
           <!-- <div class="inpTool"><span class="images" ><img style="width:28px; height:28px"  :src="topimgs"  @click="back()" alt=""></span> </div> -->
           <textarea v-on:keyup.enter="send"  style="resize:none;"  class="inpEnter" v-model="say" placeholder="请输入内容..." />
           <button class="sendBtn"  @click="send" :disabled ='say?false:true'>发送</button>
-        </div>
+           </div>
+         </div>
       </div>
     </div>
-    
+
   </div>
 </template>
 
@@ -62,6 +64,9 @@ export default {
       two:require('../assets/picture_chose.png'),
       ones:require('../assets/images/B1.png'),   
       twos:require('../assets/images/B2.png'),
+      backgroundImg:require('../assets/images/background.jpg'),
+      showBackgroundImg:true,
+      showChat:false,
       chatList:[],//会话列表
       say:'',
       nowChat:null,//当前对话框对象
@@ -118,7 +123,6 @@ export default {
     isConnect(newVal){
       console.log('组件中监听链接是否成功',newVal)
       if(newVal){  //全局监听融云连接成功
-        console.log(111)
         this.getChat()//获取会话列表，要钱
         // this.getChatRecord() //获取指定会话聊天记录，要钱        
       }
@@ -136,6 +140,10 @@ export default {
     },
     openChat(d){ //点击了会话列表，获取对应会话的历史记录
       const self=this;
+      //点开任意一个会话就隐藏初始化图片显示chatRoom
+      self.showBackgroundImg=false;
+      self.showChat=true;
+
       if(d.targetId==self.targetMan){
         return false;//重复点击不会加载聊天记录
       }
@@ -337,10 +345,11 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .chatHeader{
+  width: 100%;
   text-align: center;
   background: greenyellow;
   height: 50px;
-
+  line-height:50px;
 }
 .btn{
   top: 10px;
@@ -400,7 +409,7 @@ export default {
 }
 .chatList{
   width: 400px;
-  height:calc(100vh - 71px);
+  height:calc(100vh - 75px);
   flex-shrink: 0;
   background: lemonchiffon;
   overflow-y: auto;
@@ -435,9 +444,13 @@ export default {
   display: flex;
   flex-direction: column;
 }
-.msgs{
+.background-img{
   width: 100%;
-  height: calc(100vh - 75px - 150px);
+  height: 100%;
+}
+.chatContent{
+  width: 100%;
+  height: calc(100vh - 75px - 50px - 150px );
   overflow-y: auto;
 }
 .inpOp{
