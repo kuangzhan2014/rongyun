@@ -124,7 +124,7 @@ export default {
       console.log('组件中监听链接是否成功',newVal)
       if(newVal){  //全局监听融云连接成功
         this.getChat()//获取会话列表，要钱
-        // this.getChatRecord() //获取指定会话聊天记录，要钱        
+        this.getChatRecord() //获取指定会话聊天记录，要钱
       }
     },
   },
@@ -217,7 +217,8 @@ export default {
     },
     getChat(){ //获取会话列表
       let self=this;
-      let conversationType = RongIMLib.ConversationType.PRIVATE; //单聊, 其他会话选择相应的消息类型即可
+      // let conversationType = RongIMLib.ConversationType.PRIVATE; //单聊, 其他会话选择相应的消息类型即可
+      let count=150;
       RongIMClient.getInstance().getConversationList({
           onSuccess: function(list) {
               // list => 会话列表集合
@@ -233,7 +234,7 @@ export default {
           onError: function(error) {
              console.log('会话列表获取失败')
           }
-      }, null);      
+      }, null,count);
     },
     scrollEvent (d) {
       let self= this;
@@ -256,7 +257,7 @@ export default {
       self.nowChat=d;
       self.targetMan=d.targetId
       console.log(d)
-      if(type&&type==1){ //不加载记录，只是切换聊天框
+      if(type&&type==1&&type==3){ //不加载记录，只是切换聊天框
         self.hisObj.forEach((v,i,a)=>{ //把对应的历史记录塞到对应对象中
           if(v.targetId==d.targetId){
               self.$store.state.answer=v.history
@@ -267,8 +268,14 @@ export default {
       }
         let conversationType=null
         if(d.conversationType==1){
-          conversationType = RongIMLib.ConversationType.PRIVATE; //单聊, 其他会话选择相应的消息类型即可
-        }else{
+            conversationType = RongIMLib.ConversationType.PRIVATE; //单聊, 其他会话选择相应的消息类型即可
+        }else if(d.conversationType==3){
+            conversationType = RongIMLib.ConversationType.GROUP;//群聊
+        }else if(d.conversationType==4){
+            conversationType = RongIMLib.ConversationType.CHATROOM;//聊天室
+        }else if(d.conversationType==6){
+            conversationType = RongIMLib.ConversationType.SYSTEM;//系统
+        } else{
           alert(`消息类型为${d.conversationType}`)
           return false
         }

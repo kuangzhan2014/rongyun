@@ -69,7 +69,7 @@ export default {
   max-width:600px;
   display: flex;
   flex-direction: column;
-  align-items: right;
+  /*align-items: right;*/
   margin-right:15px;
   margin-left:15px;
   word-break: break-all;
@@ -114,7 +114,7 @@ export default {
     max-width:600px;
     display: flex;
     flex-direction: column;
-    align-items: left;
+    /*align-items: left;*/
     margin-right:15px;
     margin-left:15px;
     word-break: break-all;
