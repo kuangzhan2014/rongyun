@@ -113,6 +113,7 @@ created () { //生命周期函数-可发起求
     nowIm(){
         const self=this;
     //自己的token------从接口获取，写到缓存
+<<<<<<< HEAD
      var chooseUser='';
      var chooseUserToken='';
      var user1=20000001;
@@ -129,6 +130,24 @@ created () { //生命周期函数-可发起求
          chooseUserToken=user2Token
          localStorage.setItem("targetId",user1);
      }
+=======
+      let userId = 2
+      let url = '/api/IM/getUserInfo/'+userId;
+      axios.get(url).then(function (response) {
+        console.log("获取用户信息成功");
+        console.log(response);
+        if(response.status === 200){
+          //获得成功响应返回的数据
+          let userInfo=response.data.ReturnData[0];
+          // console.log(userInfo.ry_token);
+          //将用户信息转化为字符串写入缓存
+          localStorage.setItem('userInfo',JSON.stringify(userInfo));
+          // console.log(JSON.parse(localStorage.getItem('userInfo')).ry_token);
+        }
+      }).catch(function (error) {
+            console.log(error);
+      });
+>>>>>>> f1b151ef6e480dac4511b2ae8b9474b4686998ef
       // var token = JSON.parse(localStorage.getItem('userInfo')).IMUser.token//"WzrthC5f4UfuiI7dIwCQ5fwtGfqCdobpowIZkcQnj8PQOQuAJb/nIi1ayzGFwJguvbQZxbJH3x0=";
       //lFLCTdymLem/eleH16XcVGqWa1TUI8otXuWvIK0HUgo=@zeph.cn.rongnav.com;zeph.cn.rongcfg.com
       RongIMClient.connect(chooseUserToken, {
