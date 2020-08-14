@@ -30,7 +30,7 @@ export default {
     return {
       time:'',
         rightUserName:JSON.parse(localStorage.getItem('userInfo')).UserName,
-        rightHeadImageUrl:decodeURIComponent(JSON.parse(localStorage.getItem('userInfo')).portrait_url),
+        rightHeadImageUrl:decodeURIComponent(JSON.parse(localStorage.getItem('userInfo')).HeadPortrait),
         leftHeadImageUrl:require('../assets/images/person2.png'),
         leftUserName:'用户名2'
     };

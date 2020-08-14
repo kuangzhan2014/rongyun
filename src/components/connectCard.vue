@@ -1,6 +1,9 @@
 <template>
   <div class="coc" @click="openChat()">
     <div class="coc-b1">
+      <img :src=detail.HeadPortrait  class ="coc-PrivateChat" v-if="detail.conversationType===1">
+      <img :src=groupImg  class ="coc-GroupChat" v-else-if="detail.conversationType===3">
+      <img :src=systemImg  class ="coc-SystemChat" v-else-if="detail.conversationType===6">
       <div class="coc-tnum" v-if="detail.unreadMessageCount*1>0">{{detail.unreadMessageCount}}</div>
     </div>
     <div class="coc-b2">
@@ -19,6 +22,9 @@ export default {
   data(){
     return{
       sendTime:'',
+      groupImg:require('../assets/images/groupImg.png'),
+      systemImg:require('../assets/images/systemImg.png'),
+      defaultImg:require('../assets/images/person2.png')
     }
   },
   props:{
@@ -55,6 +61,25 @@ export default {
   border-radius:50%;
   background: lavender;
   margin-right:15px;  
+  position: relative;
+}
+.coc-PrivateChat{
+  width:80px;
+  height:80px;
+  border-radius:50%;
+  margin-right:15px;
+  position: relative;
+}
+.coc-GroupChat{
+  width:80px;
+  height:80px;
+  margin-right:15px;
+  position: relative;
+}
+.coc-GroupChat{
+  width:80px;
+  height:80px;
+  margin-right:15px;
   position: relative;
 }
 .coc-tnum{

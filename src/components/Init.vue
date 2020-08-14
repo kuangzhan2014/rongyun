@@ -76,7 +76,7 @@ export default {
       haveHis:true,//该会话是否还有历史记录
       userIdList:[],//单聊对象的ID集合
       groupIdList:[],//群聊ID集合
-      headImageUrl:decodeURIComponent(JSON.parse(localStorage.getItem('userInfo')).portrait_url),
+      headImageUrl:decodeURIComponent(JSON.parse(localStorage.getItem('userInfo')).HeadPortrait),
       // headImageUrl:require('../assets/images/person1.png'),
       searchContent:'',
       userId:JSON.parse(localStorage.getItem('userInfo')).UserId,
@@ -221,7 +221,7 @@ export default {
     },
     getChat(){ //获取会话列表
       let self=this;
-      let conversationType = [RongIMLib.ConversationType.PRIVATE,RongIMLib.ConversationType.GROUP,RongIMLib.ConversationType.SYSTEM]; //先传单聊再传群聊
+      let conversationType = [RongIMLib.ConversationType.PRIVATE,RongIMLib.ConversationType.GROUP,RongIMLib.ConversationType.SYSTEM]; //先传单聊再传群聊,null值传所有
       let count=150;
 
       RongIMClient.getInstance().getConversationList({
@@ -240,15 +240,14 @@ export default {
                     self.userIdList.push(ddd)
                 }else if(ddd.conversationType==3){
                     self.groupIdList.push(ddd)
-                }else if(ddd.conversationType==6){
-                    self.groupIdList.push(ddd)
                 }
                 self.hisObj.push(ddd)
               })
               self.getUserInfo(self.userIdList,self.chatList)
-              console.log('单聊返回',self.chatList)
+              // console.log('单聊返回',self.chatList)
               self.getGroupInfo(self.groupIdList,self.chatList)
-              console.log('群聊返回',self.chatList)
+              // console.log('群聊返回',self.chatList)
+              //判断会话是否正确，从charList删除错误会话
               console.log('历史记录大对象',self.hisObj)
           },
           onError: function(error) {
@@ -277,6 +276,7 @@ export default {
                         if(v.targetId==c.UserID){
                             // v.NickName=c.NickName
                             // v.HeadPortrait=c.HeadPortrait
+                            // 向响应式对象中添加一个属性，并确保这个新属性同样是响应式的，且触发视图更新。它必须用于向响应式对象上添加新属性，因为 Vue 无法探测普通的新增属性 (比如 this.obj.ne
                             Vue.set(v,'NickName',c.NickName)
                             Vue.set(v,'HeadPortrait',c.HeadPortrait)
                         }
@@ -287,10 +287,9 @@ export default {
         }).catch(function (error) {
             console.log(error);
         });
-        // return charlist
     },
     getGroupInfo(d){
-        console.log('群聊',d)
+        // console.log('群聊',d)
         let groupIdInfoList=''
     },
 
@@ -352,7 +351,6 @@ export default {
                       console.log('当前获取到的历史记录',list)
                       v.history=list.concat(v.history)
                       self.$store.state.answer=v.history
-
                   }
                 })
                 if(flag){
