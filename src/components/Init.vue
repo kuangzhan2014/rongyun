@@ -40,6 +40,7 @@
 </template>
 
 <script>
+import Vue from "vue"
 import axios from "axios";
 import {mapState,mapGetters,mapActions,mapMutations} from 'vuex'
 import homeNews from './homeNews'
@@ -73,10 +74,13 @@ export default {
       targetMan:10,//目前会话框的对象
       hisObj:[],//历史记录大对象
       haveHis:true,//该会话是否还有历史记录
+      userIdList:[],//单聊对象的ID集合
+      groupIdList:[],//群聊ID集合
       headImageUrl:decodeURIComponent(JSON.parse(localStorage.getItem('userInfo')).portrait_url),
       // headImageUrl:require('../assets/images/person1.png'),
       searchContent:'',
-      userId:JSON.parse(localStorage.getItem('userInfo')).UserId
+      userId:JSON.parse(localStorage.getItem('userInfo')).UserId,
+      chatTotalList:[]
     };
   },
   name: "homeIm",
@@ -124,7 +128,7 @@ export default {
       console.log('组件中监听链接是否成功',newVal)
       if(newVal){  //全局监听融云连接成功
         this.getChat()//获取会话列表，要钱
-        this.getChatRecord() //获取指定会话聊天记录，要钱
+        // this.getChatRecord() //获取指定会话聊天记录，要钱
       }
     },
   },
@@ -217,25 +221,79 @@ export default {
     },
     getChat(){ //获取会话列表
       let self=this;
-      // let conversationType = RongIMLib.ConversationType.PRIVATE; //单聊, 其他会话选择相应的消息类型即可
+      let conversationType = [RongIMLib.ConversationType.PRIVATE,RongIMLib.ConversationType.GROUP,RongIMLib.ConversationType.SYSTEM]; //先传单聊再传群聊
       let count=150;
+
       RongIMClient.getInstance().getConversationList({
           onSuccess: function(list) {
               // list => 会话列表集合
               console.log('会话列表集合',list)
               self.chatList=list
               self.chatList.forEach((v,i,a)=>{
-                let ddd={targetId:'',history:[]}
+                let ddd={targetId:'',
+                         history:[],
+                         conversationType:''}
                 ddd.targetId=v.targetId
+                //通过返回的会话类型值，将单聊和群聊的targetId分别存放
+                ddd.conversationType=v.conversationType
+                if(ddd.conversationType==1){
+                    self.userIdList.push(ddd)
+                }else if(ddd.conversationType==3){
+                    self.groupIdList.push(ddd)
+                }else if(ddd.conversationType==6){
+                    self.groupIdList.push(ddd)
+                }
                 self.hisObj.push(ddd)
               })
+              self.getUserInfo(self.userIdList,self.chatList)
+              console.log('单聊返回',self.chatList)
+              self.getGroupInfo(self.groupIdList,self.chatList)
+              console.log('群聊返回',self.chatList)
               console.log('历史记录大对象',self.hisObj)
           },
           onError: function(error) {
              console.log('会话列表获取失败')
           }
-      }, null,count);
+      },conversationType,count);
     },
+    getUserInfo(d,charlist){
+       // console.log('单聊',d)
+       let userIdInfoList=''
+       let userList=''
+       d.forEach(v=>{
+           userIdInfoList+=v.targetId+','
+       })
+       userIdInfoList=userIdInfoList.substring(0, userIdInfoList.length-1)//去掉最后的逗号
+       console.log (userIdInfoList)
+
+        let userInfolistUrl = '/api/WebIM/getUserInfo/'+userIdInfoList;
+        axios.get(userInfolistUrl).then(function (response) {
+            console.log('单聊用户信息',response);
+            if(response.status === 200){
+                userList =response.data.ReturnData
+                console.log(userList)
+                charlist.forEach(v=>{
+                    userList.forEach(c=>{
+                        if(v.targetId==c.UserID){
+                            // v.NickName=c.NickName
+                            // v.HeadPortrait=c.HeadPortrait
+                            Vue.set(v,'NickName',c.NickName)
+                            Vue.set(v,'HeadPortrait',c.HeadPortrait)
+                        }
+                    })
+                })
+                console.log("总表",charlist)
+            }
+        }).catch(function (error) {
+            console.log(error);
+        });
+        // return charlist
+    },
+    getGroupInfo(d){
+        console.log('群聊',d)
+        let groupIdInfoList=''
+    },
+
     scrollEvent (d) {
       let self= this;
       // console.log(this.$refs.chatBox.scrollTop)

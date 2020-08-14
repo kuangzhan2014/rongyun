@@ -122,11 +122,10 @@ created () { //生命周期函数-可发起求
     nowIm(){
         const self=this;
     //自己的token------从接口获取，写到缓存
-      let userId = 1
+      let userId = 2
       let url = '/api/IM/getUserInfo/'+userId;
       axios.get(url).then(function (response) {
-        console.log("获取用户信息成功");
-        console.log(response);
+        console.log("获取当前用户信息成功",response);
         if(response.status === 200){
           //获得成功响应返回的数据
           let userInfo=response.data.ReturnData[0];
@@ -145,6 +144,7 @@ created () { //生命周期函数-可发起求
       }).catch(function (error) {
             console.log(error);
       });
+
       // var token = JSON.parse(localStorage.getItem('userInfo')).IMUser.token//"WzrthC5f4UfuiI7dIwCQ5fwtGfqCdobpowIZkcQnj8PQOQuAJb/nIi1ayzGFwJguvbQZxbJH3x0=";
       // var token = 'lFLCTdymLem/eleH16XcVGqWa1TUI8otXuWvIK0HUgo=@zeph.cn.rongnav.com;zeph.cn.rongcfg.com';
       var ry_token = JSON.parse(localStorage.getItem('userInfo')).ry_token;
