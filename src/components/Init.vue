@@ -17,7 +17,7 @@
       <div class="chatRoom" >
         <img class="background-img" :src="backgroundImg" v-show="showBackgroundImg" >
         <div class="chatRoom"  v-show="showChat" >
-            <div class="chatHeader">群聊名字</div>
+            <div class="chatHeader">{{conversationName}}</div>
             <div class="chatContent" id='homeIm' @scroll="scrollEvent" ref='chatBox'>
               <div class="loadHistory">
                 <span class="loadHistory-t" @click="loadHis()">{{haveHis?'加载历史记录':'没有历史记录了'}}</span>
@@ -74,13 +74,14 @@ export default {
       targetMan:10,//目前会话框的对象
       hisObj:[],//历史记录大对象
       haveHis:true,//该会话是否还有历史记录
-      userIdList:[],//单聊对象的ID集合
-      groupIdList:[],//群聊ID集合
+      privateChatList:[],//存放私聊类型的融云返回会话记录
+      groupChatList:[],//存放群聊类型的融云返回会话记录
+      allChatList:[],//存放所有类型的融云返回会话记录
       headImageUrl:decodeURIComponent(JSON.parse(localStorage.getItem('userInfo')).HeadPortrait),
       // headImageUrl:require('../assets/images/person1.png'),
       searchContent:'',
       userId:JSON.parse(localStorage.getItem('userInfo')).UserId,
-      chatTotalList:[]
+      conversationName:'',
     };
   },
   name: "homeIm",
@@ -144,10 +145,11 @@ export default {
     },
     openChat(d){ //点击了会话列表，获取对应会话的历史记录
       const self=this;
+      console.log('当前会话对象',d)
+      self.conversationName=d.ConversationName
       //点开任意一个会话就隐藏初始化图片显示chatRoom
       self.showBackgroundImg=false;
       self.showChat=true;
-
       if(d.targetId==self.targetMan){
         return false;//重复点击不会加载聊天记录
       }
@@ -223,74 +225,132 @@ export default {
       let self=this;
       let conversationType = [RongIMLib.ConversationType.PRIVATE,RongIMLib.ConversationType.GROUP,RongIMLib.ConversationType.SYSTEM]; //先传单聊再传群聊,null值传所有
       let count=150;
-
       RongIMClient.getInstance().getConversationList({
           onSuccess: function(list) {
               // list => 会话列表集合
               console.log('会话列表集合',list)
               self.chatList=list
               self.chatList.forEach((v,i,a)=>{
+                //融云返回的会话列表缺少会话名称、头像、最新消息发送者名字
+                Vue.set(v,'ConversationName',null)
+                Vue.set(v,'HeadPortrait',null)
+                Vue.set(v,'SenderUserName',null)
                 let ddd={targetId:'',
                          history:[],
-                         conversationType:''}
-                ddd.targetId=v.targetId
-                //通过返回的会话类型值，将单聊和群聊的targetId分别存放
+                         conversationType:'',
+                         senderUserId:''}
+                v.latestMessage.senderUserId=v.latestMessage.senderUserId.replace(/[^0-9]/ig,"")//数据库中userId是纯数字
+                ddd.senderUserId=v.latestMessage.senderUserId
+                //融云返回的会话targetId,如果是私聊，其值为userId,如果是群聊，其值是groupId
                 ddd.conversationType=v.conversationType
-                if(ddd.conversationType==1){
-                    self.userIdList.push(ddd)
-                }else if(ddd.conversationType==3){
-                    self.groupIdList.push(ddd)
+                if(ddd.conversationType===1){
+                    v.targetId=v.targetId.replace(/[^0-9]/ig,"")//数据库中userId是纯数字
+                    ddd.targetId=v.targetId
+                    self.privateChatList.push(ddd)
+                }else if(ddd.conversationType===3){
+                    ddd.targetId=v.targetId
+                    self.groupChatList.push(ddd)
+                }else if(ddd.conversationType===6){
+                    v.ConversationName='系统消息'
                 }
+                self.allChatList.push(ddd)
                 self.hisObj.push(ddd)
               })
-              self.getUserInfo(self.userIdList,self.chatList)
-              // console.log('单聊返回',self.chatList)
-              self.getGroupInfo(self.groupIdList,self.chatList)
-              // console.log('群聊返回',self.chatList)
-              //判断会话是否正确，从charList删除错误会话
-              console.log('历史记录大对象',self.hisObj)
+              self.getAllChatInfo(self.allChatList,self.chatList)
+              self.getPrivateChatInfo(self.privateChatList,self.chatList)
+              self.getGroupChatInfo(self.groupChatList,self.chatList)
+              console.log('历史记录的对象',self.hisObj)
           },
           onError: function(error) {
              console.log('会话列表获取失败')
           }
       },conversationType,count);
     },
-    getUserInfo(d,charlist){
+    getPrivateChatInfo(d,charList){
+       //通过userId获取私聊对象的头像和名字
        // console.log('单聊',d)
-       let userIdInfoList=''
-       let userList=''
+       let userIdList=''
+       let userInfoList=''
        d.forEach(v=>{
-           userIdInfoList+=v.targetId+','
+           userIdList+=v.targetId+','
        })
-       userIdInfoList=userIdInfoList.substring(0, userIdInfoList.length-1)//去掉最后的逗号
-       console.log (userIdInfoList)
-
-        let userInfolistUrl = '/api/WebIM/getUserInfo/'+userIdInfoList;
-        axios.get(userInfolistUrl).then(function (response) {
-            console.log('单聊用户信息',response);
+       userIdList=userIdList.substring(0, userIdList.length-1)//去掉最后的逗号
+       // console.log ('userId拼接',userIdList)
+        let userInfoListUrl = '/api/WebIM/getUserInfo/'+userIdList;
+        axios.get(userInfoListUrl).then(function (response) {
+            // console.log('单聊用户信息',response);
             if(response.status === 200){
-                userList =response.data.ReturnData
-                console.log(userList)
-                charlist.forEach(v=>{
-                    userList.forEach(c=>{
-                        if(v.targetId==c.UserID){
-                            // v.NickName=c.NickName
-                            // v.HeadPortrait=c.HeadPortrait
-                            // 向响应式对象中添加一个属性，并确保这个新属性同样是响应式的，且触发视图更新。它必须用于向响应式对象上添加新属性，因为 Vue 无法探测普通的新增属性 (比如 this.obj.ne
-                            Vue.set(v,'NickName',c.NickName)
-                            Vue.set(v,'HeadPortrait',c.HeadPortrait)
+                userInfoList =response.data.ReturnData
+                // console.log(userInfoList)
+                charList.forEach(v=>{
+                    userInfoList.forEach(c=>{
+                        if(v.targetId==c.UserID && v.conversationType==1){
+                            v.ConversationName=c.NickName
+                            v.HeadPortrait=c.HeadPortrait
                         }
                     })
                 })
-                console.log("总表",charlist)
             }
         }).catch(function (error) {
             console.log(error);
         });
     },
-    getGroupInfo(d){
+    getGroupChatInfo(d,charList){
+        //通过groupId获取群聊名称
         // console.log('群聊',d)
-        let groupIdInfoList=''
+        let groupIdList=''
+        let groupInfoList=''
+        d.forEach(v=>{
+            groupIdList+=v.targetId+','
+        })
+        groupIdList=groupIdList.substring(0, groupIdList.length-1)//去掉最后的逗号
+        // console.log ('groupId拼接',groupIdList)
+        let groupInfoListUrl = '/api/WebIM/getGroupInfo/'+groupIdList;
+        axios.get(groupInfoListUrl).then(function (response) {
+            // console.log('群聊信息',response);
+            if(response.status === 200){
+                groupInfoList =response.data.ReturnData
+                // console.log(groupInfoList)
+                charList.forEach(v=>{
+                    groupInfoList.forEach(c=>{
+                        if(v.targetId==c.GroupID && v.conversationType==3){
+                            v.ConversationName=c.GroupName
+                            v.HeadPortrait=c.HeadPortrait
+                        }
+                    })
+                })
+            }
+        }).catch(function (error) {
+            console.log(error);
+        });
+    },
+    getAllChatInfo(d,charList){
+        //获取最新消息发送者的名字
+        //！！！！！！getchat()只在初始化调用一次，需要每次获取消息时将新的userId存入缓存，即消息体中的用户信息应从缓存读取
+        let userIdList=''
+        let userInfoList=''
+        d.forEach(v=>{
+            userIdList+=v.senderUserId+','
+        })
+        userIdList=userIdList.substring(0, userIdList.length-1)//去掉最后的逗号
+        // console.log ('senderUserId拼接',userIdList)
+        let userInfoListUrl = '/api/WebIM/getUserInfo/'+userIdList;
+        axios.get(userInfoListUrl).then(function (response) {
+            // console.log('sender用户信息',response);
+            if(response.status === 200){
+                userInfoList =response.data.ReturnData
+                // console.log(userInfoList)
+                charList.forEach(v=>{
+                    userInfoList.forEach(c=>{
+                        if(v.latestMessage.senderUserId==c.UserID){
+                           v.senderUserName=c.NickName
+                        }
+                    })
+                })
+            }
+        }).catch(function (error) {
+            console.log(error);
+        });
     },
 
     scrollEvent (d) {

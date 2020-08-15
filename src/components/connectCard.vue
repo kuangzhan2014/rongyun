@@ -1,18 +1,18 @@
 <template>
   <div class="coc" @click="openChat()">
     <div class="coc-b1">
-      <img :src=detail.HeadPortrait  class ="coc-PrivateChat" v-if="detail.conversationType===1">
+      <img :src=getImg(detail.HeadPortrait)  class ="coc-PrivateChat" v-if="detail.conversationType===1">
       <img :src=groupImg  class ="coc-GroupChat" v-else-if="detail.conversationType===3">
       <img :src=systemImg  class ="coc-SystemChat" v-else-if="detail.conversationType===6">
       <div class="coc-tnum" v-if="detail.unreadMessageCount*1>0">{{detail.unreadMessageCount}}</div>
     </div>
     <div class="coc-b2">
       <div class="coc-b21">
-        <span class="coc-b21-1">{{detail.NickName}}</span>
+        <span class="coc-b21-1">{{getConversationName(detail.ConversationName)}}</span>
         <span class="coc-b21-2">{{sendTime}}</span>
       </div>
       <div class="coc-b22">
-        {{`发送者id${detail.latestMessage.senderUserId}说`}}：{{detail.latestMessage.content.content}}
+        {{`${getSenderUserName(detail.senderUserName)}说`}}：{{detail.latestMessage.content.content}}
       </div>
     </div>
   </div>
@@ -40,6 +40,33 @@ export default {
     openChat(){
       this.$emit('openChat',this.detail)
     },
+    getImg(d){
+      if(d===undefined || d === null  || d===''){
+        return d= this.defaultImg
+      }else{
+        return  d
+      }
+    },
+    getConversationName(d){
+      if(d===undefined || d === null  || d===''){
+        if(this.detail.conversationType===1){
+          return d='修理厂私聊'
+        }else if(this.detail.conversationType===3) {
+          return d='修理厂群聊'
+        }else if(this.detail.conversationType===6){
+          return d='系统消息'
+        }
+      }else{
+        return d
+      }
+    },
+    getSenderUserName(d){
+      if(d===undefined || d === null  || d===''){
+        return d='id为'+this.detail.latestMessage.senderUserId+'的人'
+      }else{
+       return d
+      }
+    }
   },
 }
 </script>
