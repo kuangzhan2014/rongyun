@@ -10,9 +10,9 @@
       </div>
       <div class="chatList">
         <div class="search">
-          <input class="search-1" type="text" placeholder="请输入搜索内容并按回车键结束" @keyup.enter="getSearchChat()" ref="searchContent">
+          <input class="search-1" type="text" placeholder="请输入要搜索的会话名称" @input="getSearchChat()" ref="searchContent">
         </div>
-        <connectCard v-on:openChat="openChat" v-for="(detail,index) in chatList" :key="index" :detail="detail"></connectCard>
+        <connectCard v-on:openChat="openChat" v-for="(detail,index) in (isSearch?searchChatList:chatList)" :key="index" :detail="detail"></connectCard>
       </div>
       <div class="chatRoom" >
         <img class="background-img" :src="backgroundImg" v-show="showBackgroundImg" >
@@ -79,9 +79,10 @@ export default {
       allChatList:[],//存放所有类型的融云返回会话记录
       headImageUrl:decodeURIComponent(JSON.parse(localStorage.getItem('userInfo')).HeadPortrait),
       // headImageUrl:require('../assets/images/person1.png'),
-      searchContent:'',
       userId:JSON.parse(localStorage.getItem('userInfo')).UserId,
       conversationName:'',
+      searchChatList:[],
+      isSearch:false
     };
   },
   name: "homeIm",
@@ -454,22 +455,23 @@ export default {
       });
     },
     getSearchChat(){  //搜索会话
-      this.searchContent = this.$refs.searchContent.value;
-      // if(searchContent)
-      console.log(this.searchContent);
-      axios.get('/api/Im/getlist',{
-        params:{
-          userId:this.userId,
-          searchContent:this.searchContent
-        }
-      }).then(function (response) {
-        if(response.status === 200){
-          //获得成功响应返回的数据
-
-        }
-      }).catch(function (error) {
-        console.log(error);
-      });
+      let self=this
+      self.searchChatList=[]  //搜索之前先清空
+      let searchContent  = self.$refs.searchContent.value.trim()  //去掉首尾空格
+      // console.log(searchContent);
+      if(searchContent===''){
+          self.isSearch=false  //如果去掉首尾空格后输入的是空，则不进行查询
+      }else{
+          self.chatList.forEach(c=>{
+              if(c.ConversationName.indexOf(searchContent)!=-1){
+                  // console.log('查找会话存在')
+                  self.searchChatList.push(c)
+              }
+          })
+          self.isSearch=true
+      }
+      // console.log(self.searchChatList)
+      // console.log(self.isSearch)
     },
 
   },
