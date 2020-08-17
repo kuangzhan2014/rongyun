@@ -259,6 +259,7 @@ export default {
               self.getAllChatInfo(self.allChatList,self.chatList)
               self.getPrivateChatInfo(self.privateChatList,self.chatList)
               self.getGroupChatInfo(self.groupChatList,self.chatList)
+              self.getDefault(self.chatList)
               console.log('历史记录的对象',self.hisObj)
           },
           onError: function(error) {
@@ -352,7 +353,17 @@ export default {
             console.log(error);
         });
     },
-
+    getDefault(charList){
+        charList.forEach(v=>{
+            if(v.ConversationName===null || v.ConversationName===''){
+                if(v.conversationType===1){
+                    v.ConversationName='修理厂私聊'
+                }else if(v.conversationType===3){
+                    v.ConversationName='修理厂群聊'
+                }
+            }
+        })
+    },
     scrollEvent (d) {
       let self= this;
       // console.log(this.$refs.chatBox.scrollTop)

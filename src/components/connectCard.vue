@@ -8,7 +8,7 @@
     </div>
     <div class="coc-b2">
       <div class="coc-b21">
-        <span class="coc-b21-1">{{getConversationName(detail.ConversationName)}}</span>
+        <span class="coc-b21-1">{{detail.ConversationName}}</span>
         <span class="coc-b21-2">{{sendTime}}</span>
       </div>
       <div class="coc-b22">
