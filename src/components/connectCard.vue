@@ -12,7 +12,7 @@
         <span class="coc-b21-2">{{sendTime}}</span>
       </div>
       <div class="coc-b22">
-        {{`${getSenderUserName(detail.senderUserName)}说`}}：{{detail.latestMessage.content.content}}
+        {{`${getUserInfo(detail.latestMessage.senderUserId)}说`}}：{{detail.latestMessage.content.content}}
       </div>
     </div>
   </div>
@@ -66,6 +66,13 @@ export default {
       }else{
        return d
       }
+    },
+    getUserInfo(id){
+      // console.log(this.detail.latestMessage.senderUserId)
+      let userInfo=this.$parent.getUserInfo(id)
+      return userInfo.NickName
+      // return  this._self.$parent.getUserInfo(id).ConversationName
+      // this.$emit('getUserInfo',id);
     }
   },
 }

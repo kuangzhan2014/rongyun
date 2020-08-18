@@ -41,7 +41,7 @@
 
 <script>
 import Vue from "vue"
-import axios from "axios";
+import axios from "axios"
 import {mapState,mapGetters,mapActions,mapMutations} from 'vuex'
 import homeNews from './homeNews'
 import connectCard from './connectCard'
@@ -77,6 +77,7 @@ export default {
       privateChatList:[],//存放私聊类型的融云返回会话记录
       groupChatList:[],//存放群聊类型的融云返回会话记录
       allChatList:[],//存放所有类型的融云返回会话记录
+      userInfoMap:[],//本地缓存存放所有用户信息
       headImageUrl:decodeURIComponent(JSON.parse(localStorage.getItem('userInfo')).HeadPortrait),
       // headImageUrl:require('../assets/images/person1.png'),
       userId:JSON.parse(localStorage.getItem('userInfo')).UserId,
@@ -120,11 +121,11 @@ export default {
   },
   watch: { //------------------------重要-------有消息就滚动到底部-----------------------
     answer() {
-      // this.$nextTick(() => {
-      //   let list = document.getElementById('homeIm')
-      //   list.scrollTop = list.scrollHeight
-      //   //如不行，请尝试->  list.scrollTop = list.scrollHeight
-      // })
+      this.$nextTick(() => {
+        let list = document.getElementById('homeIm')
+        list.scrollTop = list.scrollHeight
+        //如不行，请尝试->  list.scrollTop = list.scrollHeight
+      })
     },
     isConnect(newVal){
       console.log('组件中监听链接是否成功',newVal)
@@ -261,16 +262,19 @@ export default {
               self.getPrivateChatInfo(self.privateChatList,self.chatList)
               self.getGroupChatInfo(self.groupChatList,self.chatList)
               self.getDefault(self.chatList)
+              // console.log('成功',self.getUserInfo(1))
               console.log('历史记录的对象',self.hisObj)
           },
           onError: function(error) {
              console.log('会话列表获取失败')
           }
       },conversationType,count);
+
     },
     getPrivateChatInfo(d,charList){
        //通过userId获取私聊对象的头像和名字
        // console.log('单聊',d)
+       let self =this
        let userIdList=''
        let userInfoList=''
        d.forEach(v=>{
@@ -283,7 +287,9 @@ export default {
             // console.log('单聊用户信息',response);
             if(response.status === 200){
                 userInfoList =response.data.ReturnData
-                // console.log(userInfoList)
+                // console.log('单聊',userInfoList)
+                let allUserList=JSON.parse(localStorage.getItem('allUserInfo'))
+                localStorage.setItem('allUserInfo',JSON.stringify(self.getUniques(allUserList,userInfoList)))
                 charList.forEach(v=>{
                     userInfoList.forEach(c=>{
                         if(v.targetId==c.UserID && v.conversationType==1){
@@ -300,6 +306,7 @@ export default {
     getGroupChatInfo(d,charList){
         //通过groupId获取群聊名称
         // console.log('群聊',d)
+        let self =this
         let groupIdList=''
         let groupInfoList=''
         d.forEach(v=>{
@@ -315,6 +322,8 @@ export default {
                 // console.log(groupInfoList)
                 charList.forEach(v=>{
                     groupInfoList.forEach(c=>{
+                        let allUserList=JSON.parse(localStorage.getItem('allUserInfo'))
+                        localStorage.setItem('allUserInfo',JSON.stringify(self.getUniques(allUserList,c.MerberList)))
                         if(v.targetId==c.GroupID && v.conversationType==3){
                             v.ConversationName=c.GroupName
                             v.HeadPortrait=c.HeadPortrait
@@ -328,9 +337,9 @@ export default {
     },
     getAllChatInfo(d,charList){
         //获取最新消息发送者的名字
-        //！！！！！！getchat()只在初始化调用一次，需要每次获取消息时将新的userId存入缓存，即消息体中的用户信息应从缓存读取
         let userIdList=''
         let userInfoList=''
+        let self =this
         d.forEach(v=>{
             userIdList+=v.senderUserId+','
         })
@@ -341,7 +350,8 @@ export default {
             // console.log('sender用户信息',response);
             if(response.status === 200){
                 userInfoList =response.data.ReturnData
-                // console.log(userInfoList)
+                let allUserList=JSON.parse(localStorage.getItem('allUserInfo'))
+                localStorage.setItem('allUserInfo',JSON.stringify(self.getUniques(allUserList,userInfoList)))
                 charList.forEach(v=>{
                     userInfoList.forEach(c=>{
                         if(v.latestMessage.senderUserId==c.UserID){
@@ -364,6 +374,70 @@ export default {
                 }
             }
         })
+    },
+    getUserInfo(id){
+        let self =this
+        // id=id.replace(/[^0-9]/ig,"")
+        let userInfoList=JSON.parse(localStorage.getItem('allUserInfo'))
+        let userInfo=[]
+        let isExist=false
+        userInfoList.forEach(c=>{
+            // console.log(c)
+            if(c.UserID==id){
+                isExist=true
+                userInfo=c
+                // console.log('存在')
+            }
+        })
+        // console.log(isExist)
+        if(!isExist){
+            let userInfoListUrl = '/api/WebIM/getUserInfo/'+id;
+            axios.get(userInfoListUrl).then(function (response) {
+                if(response.status === 200){
+                    userInfo =response.data.ReturnData[0]
+                    // console.log('重新查找',userInfo)
+                    let ddd={ UserID:userInfo.UserID,
+                        HeadPortrait:userInfo.HeadPortrait,
+                        NickName:userInfo.NickName
+                    }
+                    userInfoList.push(ddd)
+                    // console.log('新增',userInfoList)
+                    let allUserList=JSON.parse(localStorage.getItem('allUserInfo'))
+                    localStorage.setItem('allUserInfo',JSON.stringify(self.getUniques(allUserList,userInfoList)))
+                    // localStorage.setItem('allUserInfo',JSON.stringify(userInfoList))
+                }
+            }).catch(function (error) {
+                console.log(error);
+            });
+        }
+        return userInfo
+    },
+    getUniques(a,b){
+        //数组去重
+        let aa=a
+        let bb=b
+        let obj=aa.concat(bb)
+        // console.log(obj)
+        var uniques = [];
+        var stringify = {};
+        for (var i = 0; i < obj.length; i++) {
+            var keys = Object.keys(obj[i]);
+            keys.sort(function(a, b) {
+                return (Number(a) - Number(b));
+            });
+            var str = '';
+            for (var j = 0; j < keys.length; j++) {
+                str += JSON.stringify(keys[j]);
+                str += JSON.stringify(obj[i][keys[j]]);
+            }
+            if (!stringify.hasOwnProperty(str)) {
+                uniques.push(obj[i]);
+                stringify[str] = true;
+            }
+        }
+        uniques = uniques;
+        // console.log(uniques)
+        return uniques;
     },
     scrollEvent (d) {
       let self= this;

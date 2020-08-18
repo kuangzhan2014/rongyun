@@ -1,9 +1,9 @@
 <script>
     var isTokenNull = false;
-    var ry;
+    var adminList=['777','7777'];
     export default
     {
         isTokenNull,
-        ry
+        adminList,
     }
 </script>
