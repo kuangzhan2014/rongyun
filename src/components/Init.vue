@@ -654,7 +654,7 @@ export default {
   display: flex;
   flex-direction: column;
 }
-.background-img{
+.background-img{ 
   width: 100%;
   height: 100%;
 }
