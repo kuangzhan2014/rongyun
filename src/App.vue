@@ -93,6 +93,8 @@ created () { //生命周期函数-可发起求
                       // message.content.content => 位置图片 base64
                       break;
                   case RongIMClient.MessageType.RichContentMessage:
+                      console.log('接受到的图文消息',message,message.content.content)
+                      that.$refs.mainPart.gotMsg(message)
                       // message.content.content => 文本消息内容
                       // message.content.imageUri => 图片 base64
                       // message.content.url => 原图 URL

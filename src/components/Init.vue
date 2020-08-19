@@ -177,8 +177,8 @@ export default {
       })          
     },
     gotMsg(d){  //收到消息啦！！！！
-      this.answer.push(d);
-      this.toBottom();
+        this.answer.push(d);
+        this.toBottom();
     },
     send() {
       if(!this.send){
@@ -401,7 +401,7 @@ export default {
                         NickName:userInfo.NickName
                     }
                     userInfoList.push(ddd)
-                    // console.log('新增',userInfoList)
+                    // console.log('新增',ddd)
                     let allUserList=JSON.parse(localStorage.getItem('allUserInfo'))
                     localStorage.setItem('allUserInfo',JSON.stringify(self.getUniques(allUserList,userInfoList)))
                     // localStorage.setItem('allUserInfo',JSON.stringify(userInfoList))

@@ -10,14 +10,14 @@
          </div>
       </div>
       <div class="left" v-if="data.messageType =='TextMessage'&&data.messageDirection!='1'">
-         <div class="left-head"><img class="left-head-img" :src="leftHeadImageUrl"></div>
+         <div class="left-head"><img class="left-head-img" :src=getUserInfo(data.senderUserId).HeadPortrait></div>
          <div class="left-con">
-           <div class="leftUserName">{{leftUserName}}</div>
+           <div class="leftUserName">{{getUserInfo(data.senderUserId).NickName}}</div>
            <div class="content">{{data.content.content}}</div>
            <div class="time">{{time}}</div>
          </div>        
       </div>
-      
+
   </div>
 </template>
 
@@ -41,6 +41,10 @@ export default {
   methods: {
     getLocalTime(nS) {     
       return new Date(parseInt(nS) ).toLocaleString().replace(/:\d{1,2}$/,' ');     
+    },
+    getUserInfo(d){
+        let userInfo=this.$parent.getUserInfo(d)
+        return userInfo
     }
   }
 };
