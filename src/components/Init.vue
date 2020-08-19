@@ -225,6 +225,7 @@ export default {
     },
     getChat(){ //获取会话列表
       let self=this;
+      self.chatList=null//获取前都先清空
       let conversationType = [RongIMLib.ConversationType.PRIVATE,RongIMLib.ConversationType.GROUP,RongIMLib.ConversationType.SYSTEM]; //先传单聊再传群聊,null值传所有
       let count=150;
       RongIMClient.getInstance().getConversationList({
@@ -319,7 +320,7 @@ export default {
             // console.log('群聊信息',response);
             if(response.status === 200){
                 groupInfoList =response.data.ReturnData
-                // console.log(groupInfoList)
+                console.log(groupInfoList)
                 charList.forEach(v=>{
                     groupInfoList.forEach(c=>{
                         let allUserList=JSON.parse(localStorage.getItem('allUserInfo'))
@@ -401,7 +402,7 @@ export default {
                         NickName:userInfo.NickName
                     }
                     userInfoList.push(ddd)
-                    // console.log('新增',ddd)
+                    console.log('新增',ddd)
                     let allUserList=JSON.parse(localStorage.getItem('allUserInfo'))
                     localStorage.setItem('allUserInfo',JSON.stringify(self.getUniques(allUserList,userInfoList)))
                     // localStorage.setItem('allUserInfo',JSON.stringify(userInfoList))

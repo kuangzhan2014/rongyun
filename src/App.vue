@@ -72,18 +72,20 @@ created () { //生命周期函数-可发起求
           onReceived: function (message) {
               // 判断消息类型
               console.log('接受到的全部消息',message)
+              that.$refs.mainPart.getChat()//收到新的消息就重新绘制会话列表+
               switch(message.messageType){
                   case RongIMClient.MessageType.TextMessage:
                       // message.content.content => 文字内容
                       //----------------------------重要-------把获取的消息存放在store中，全局公用homeIm.vue要使用
                       console.log('接受到的文字消息',message,message.content.content)
                       that.$refs.mainPart.gotMsg(message) //全部消息放到组件中处理
-                    //   that.getAnswer(message)
+                      // that.getAnswer(message)
                       break;
                   case RongIMClient.MessageType.VoiceMessage:
                       // message.content.content => 格式为 AMR 的音频 base64
                       break;
                   case RongIMClient.MessageType.ImageMessage:
+                    that.getAnswer(message)
                       // message.content.content => 图片缩略图 base64
                       // message.content.imageUri => 原图 URL
                       break;
@@ -94,7 +96,8 @@ created () { //生命周期函数-可发起求
                       break;
                   case RongIMClient.MessageType.RichContentMessage:
                       console.log('接受到的图文消息',message,message.content.content)
-                      that.$refs.mainPart.gotMsg(message)
+                      // that.$refs.mainPart.gotMsg(message)
+                      // that.getAnswer(message)
                       // message.content.content => 文本消息内容
                       // message.content.imageUri => 图片 base64
                       // message.content.url => 原图 URL
@@ -133,7 +136,7 @@ created () { //生命周期函数-可发起求
           self.allUserInfo.push(dd)
       })
     //自己的token------从接口获取，写到缓存
-      let userId = 101
+      let userId = 102
       let url = '/api/IM/getUserInfo/'+userId;
       axios.get(url).then(function (response) {
         console.log("获取当前用户信息成功",response);

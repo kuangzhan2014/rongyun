@@ -29,10 +29,10 @@ export default {
   data() {
     return {
       time:'',
-        rightUserName:JSON.parse(localStorage.getItem('userInfo')).UserName,
+        rightUserName:JSON.parse(localStorage.getItem('userInfo')).Nickname,
         rightHeadImageUrl:decodeURIComponent(JSON.parse(localStorage.getItem('userInfo')).HeadPortrait),
-        leftHeadImageUrl:require('../assets/images/person2.png'),
-        leftUserName:'用户名2'
+        // leftHeadImageUrl:require('../assets/images/person2.png'),
+        // leftUserName:'用户名2'
     };
   },
   created() {
