@@ -9,7 +9,7 @@ import Global from "./common/Global";
 Vue.config.productionTip = false
 // Vue.prototype.$baseUrl = 'http://tst.im.lineji.cn'
 Vue.prototype.Global = Global
-
+axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
 Vue.use(Vuex);
 new Vue({
   router,
