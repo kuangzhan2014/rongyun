@@ -505,6 +505,7 @@ export default {
               self.getPrivateChatInfo(self.privateChatList,self.chatList)
               self.getGroupChatInfo(self.groupChatList,self.chatList)
               self.getDefault(self.chatList)
+              self.sortList(self.chatList)              
               // console.log('成功',self.getUserInfo(1))
               console.log('历史记录的对象',self.hisObj)
           },
@@ -792,7 +793,46 @@ export default {
       // console.log(self.searchChatList)
       // console.log(self.isSearch)
     },
+    sortList(d){
+      console.log('我是将被排序的会话表',d)
+      const self=this;
+      let readArr=[]//已读的消息
+      let unReadArr=[]//未读的消息，未读的才会被排序
+      d.forEach((v,i,a)=>{
+        if(v.unreadMessageCount*1>0){
+          unReadArr.push(v);
+        }else{
+          readArr.push(v);
+        }
+      })
 
+      let arr1=[];//修理厂向供应商的私聊信息
+      let arr2=[];//修理厂向供货商的收获地址
+      let arr3=[];//修理厂@你的消息
+      let arr4=[];//群组消息
+      let arr5=[];//其他未定义的消息
+      let arr6=[];//已读的消息
+
+      arr6=readArr //已读消息，默认排序即可
+
+      unReadArr.forEach((v,i,a)=>{
+        if(v.conversationType==1&&(v.latestMessage.content.content.indexOf||v.latestMessage.content.content.indexOf('地址')!=-1)&&(v.latestMessage.content.content.indexOf||v.latestMessage.content.content.indexOf('@')!=-1)){ //修理厂的私聊 且不是发货信息  且不是@信息
+          arr1.push(v)
+        }else if(v.latestMessage.content.content.indexOf&&v.latestMessage.content.content.indexOf('地址')!=-1){ //此处条件为约定好的收货地址状态
+          arr2.push(v)
+        }else if(v.latestMessage.content.content.indexOf&&v.latestMessage.content.content.indexOf('@')!=-1){  //此处条件为约定好的@状态
+          arr3.push(v)
+        }else if(v.conversationType==3){ //群聊
+          arr4.push(v)
+        }else{  //其他的未知消息
+          arr5.push(v)
+        }
+      })
+      console.log(112345,arr1)
+      let allData=[].concat(arr1).concat(arr2).concat(arr3).concat(arr4).concat(arr5).concat(arr6)
+      console.log('排序好的会话',allData)
+      self.chatList=allData
+    },
   },
 };
 </script>
