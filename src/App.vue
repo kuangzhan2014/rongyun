@@ -85,7 +85,6 @@ created () { //生命周期函数-可发起求
                       // message.content.content => 格式为 AMR 的音频 base64
                       break;
                   case RongIMClient.MessageType.ImageMessage:
-                    that.getAnswer(message)
                       // message.content.content => 图片缩略图 base64
                       // message.content.imageUri => 原图 URL
                       break;
@@ -95,9 +94,8 @@ created () { //生命周期函数-可发起求
                       // message.content.content => 位置图片 base64
                       break;
                   case RongIMClient.MessageType.RichContentMessage:
-                      console.log('接受到的图文消息',message,message.content.content)
-                      // that.$refs.mainPart.gotMsg(message)
-                      // that.getAnswer(message)
+                       console.log('接受到图文的消息',message,message.content.content)
+                      that.$refs.mainPart.gotMsg(message) //全部消息放到组件中处理
                       // message.content.content => 文本消息内容
                       // message.content.imageUri => 图片 base64
                       // message.content.url => 原图 URL

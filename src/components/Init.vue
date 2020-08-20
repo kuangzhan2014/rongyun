@@ -25,22 +25,32 @@
              <homeNews v-for="(item ,index) in answer" :key='index' :item='item' :data='item'></homeNews>
             </div>
             <div class="inpOp">
-           <div class="inpTool"><span class="images" ><img style="width:28px; height:28px"  :src="flag?one:two"  @mouseover="flag=!flag"  @mouseout="flag=!flag" alt=""></span>
-              <span   class="images" ><img  style="display:block"   class="imag" :src="fleg?ones:twos"  @click="active(index)" @mouseover="fleg=!fleg" @mouseout="fleg=!fleg"   alt=""></span>
+       <div class="inpTool">
+             <!-- 点击上传文件 -->
+             <label for="fileInput">
+               <span class="images" ><img style="width:28px; height:28px"  :src="flag?one:two"  @mouseover="flag=!flag"  @mouseout="flag=!flag" alt=""></span> 
+             </label>
+             <input v-show="false" type="file" id="fileInput" style=" opacity: 0;">
+              <span  v-if="messageType!==1" class="images"  id="bgimg" ><img  style="display:block"  v-show="isShow"  class="imag" :src="fleg?ones:twos"  @click="price"   alt=""></span>
            </div>
-          <!-- <div class="inpTool"><span class="images" ><img style="width:28px; height:28px"  :src="topimgs"  @click="back()" alt=""></span> </div> -->
-          <textarea v-on:keyup.enter="send"  style="resize:none;"  class="inpEnter" v-model="say" placeholder="请输入内容..." />
-          <button class="sendBtn"  @click="send" :disabled ='say?false:true'>发送</button>
+          <textarea  v-show="isShew" id="textarea" v-on:keyup.enter="send"  ref="msg" style="resize:none;"  class="inpEnter" v-model="say" placeholder="请输入内容..."  ></textarea>
+             <div  v-on:keyup.enter="sendMs"  @blur="side"  v-html="meg" @click="huoqu" v-show="isShcw" id ="sss" placeholder="请输入内容"  class="inpEnter" ref="msg" contenteditable="true"  @input="inputDiv($event)" 
+             style="resize:none ;overflow-y:auto;overflow-x:auto;width:100%;height:100%"
+             ></div>
+          <button class="sendBtn" v-show="btn"  @click="sendMs" :disabled ='say?false:true'>发送</button>
+          <button class="sendBtn" v-show="bbtn" @click="send" :disabled ='say?false:true'>发送</button>
            </div>
          </div>
       </div>
     </div>
+    
   </div>
 </template>
 
 <script>
 import Vue from "vue"
 import axios from "axios"
+import qs from 'qs';
 import {mapState,mapGetters,mapActions,mapMutations} from 'vuex'
 import homeNews from './homeNews'
 import connectCard from './connectCard'
@@ -57,13 +67,21 @@ import imgb from '../assets/picture_unchose.png'
 export default {
   data() {
     return { 
+      meg:'',
+      messageType:'',
+      bbtn:true,
+      btn:false,
+      isShow:true,
+      isShew:true,
+      isShcw:false,
       topimgs:imga,
+      isDisable: false,
       flag:true,
       fleg:true,
       one:require('../assets/picture_unchose.png'),   
       two:require('../assets/picture_chose.png'),
       ones:require('../assets/images/B1.png'),   
-      twos:require('../assets/images/B2.png'),
+      twos:require('../assets/images/B3.png'),
       backgroundImg:require('../assets/images/background.jpg'),
       showBackgroundImg:true,
       showChat:false,
@@ -79,7 +97,9 @@ export default {
       userInfoMap:[],//本地缓存存放所有用户信息
       headImageUrl:decodeURIComponent(JSON.parse(localStorage.getItem('userInfo')).HeadPortrait),
       // headImageUrl:require('../assets/images/person1.png'),
+      searchContent:'',
       userId:JSON.parse(localStorage.getItem('userInfo')).UserId,
+      nowTime: new Date(),
       conversationName:'',
       searchChatList:[],
       isSearch:false
@@ -94,20 +114,27 @@ export default {
     connectCard
   },
   created() {
-    console.log('组件初始化中是否链接上了',this.$store.state.isConnect)
-    if(this.$store.state.isConnect){
-      this.getChat()
-    }
-    setTimeout(()=>{
-      console.log('一秒之后组件初始化中是否链接上了',this.$store.state.isConnect)
-    },1000)
-    this.$nextTick(() => {//------------------------重要-------有消息就滚动到底部-----------------------
-        let list = document.getElementById('homeIm')
-        document.documentElement.scrollTop = list.scrollHeight
-        //如不行，请尝试->  list.scrollTop = list.scrollHeight
+      console.log('组件初始化中是否链接上了', this.$store.state.isConnect)
+      if (this.$store.state.isConnect) {
+          this.getChat()
+      }
+      setTimeout(() => {
+          console.log('一秒之后组件初始化中是否链接上了', this.$store.state.isConnect)
+      }, 1000)
+      this.$nextTick(() => {//------------------------重要-------有消息就滚动到底部-----------------------
+          let list = document.getElementById('homeIm')
+          document.documentElement.scrollTop = list.scrollHeight
+          //如不行，请尝试->  list.scrollTop = list.scrollHeight
       })
   },
-  computed:{
+  mounted(){
+        // this.huoqu()
+        // this.$refs.msg.value=''
+        // if(this.fleg=false){
+        //   this.send()
+        // }
+       },
+    computed:{
     ...mapState({
       answer:"answer",
     }),
@@ -133,8 +160,54 @@ export default {
         // this.getChatRecord() //获取指定会话聊天记录，要钱
       }
     },
+    //  say(newvalue) {
+    //    this.po_Last_Div(this.$refs.msg);
+      // console.log(newvalue);
+      // // if (!this.isLocked && !this.innerText) {
+      // if (!newvalue) {
+      //   // 清空节点内所有html来清空文本
+      //   this.$refs.msg.innerHTML = '';
+      // } else {
+      //   this.keepLastIndex(this.$refs.msg);
+      // }
+    // } ,
   },
   methods: {
+    huoqu(e){
+       
+      // console.log(e.target.innerHTML)
+    },
+     inputDiv:function(e){
+      let reg = new RegExp('<div><br></div>','g')
+      this.say =  e.target.innerHTML.toString().replace(/&nbsp;/g, ' ').replace(/<div>/g,'').replace(/<\/div>/g,'').replace(/<br>/g,'\n');;
+      // console.log('Text: %o', this.say.split('"')[1].split(',')[1])
+      // this.Himg = this.say.split('"')[1].split(',')[1]
+      // if(this.Himg){
+      //     this.say.split('"')[1].split(',')[1]
+      //      console.log(this.Himg)
+      // }
+      // console.log( typeof(this.Himg))
+     
+      // console.log('Text: %o', this.say)
+    },
+   
+    price(){    // 报价
+      this.fleg=!this.fleg
+      this.isShew=!this.isShew
+      this.isShcw=!this.isShcw
+      this.btn=!this.btn
+      this.bbtn=!this.bbtn
+      // console.log(this.targetMan) //发送者的id
+      // console.log(this.messageType)
+      // console.log(this.$refs.chatBox)
+      // console.log(this.$refs.tem)
+      // console.log(this.$refs.tem[0].sendTime)
+    },
+    side(){
+      this.isShcw=!this.isShcw
+      this.fleg=!this.fleg
+      this.isShew=!this.isShew
+    },
     back(){
       if(this.topimgs=imga){
         this.topimgs=imgb
@@ -158,12 +231,12 @@ export default {
         if(v.targetId==d.targetId){
             // v.history=v.history.concat(list)
             if(!v.history[0]){//不存在记录，是初次打开,正常执行
-               self.getchatHistory(d);    
+               self.getchatHistory(d);
             }else{
               self.getchatHistory(d,1);//只切换对话，不加载历史记录
             }
         }
-      })      
+      })
       // if(d.targetId!=self.targetMan){
       //   this.getchatHistory(d);//开始获取该对话的历史记录
       // }
@@ -173,16 +246,176 @@ export default {
         let list = document.getElementById('homeIm')
         list.scrollTop = list.scrollHeight
         //如不行，请尝试->  list.scrollTop = list.scrollHeight
-      })          
+      })
     },
     gotMsg(d){  //收到消息啦！！！！
         this.answer.push(d);
         this.toBottom();
     },
-    send() {
+    //转码base64
+    // base64ImgtoFile(dataurl, filename = 'file') {
+    //   let arr = dataurl.split(',')
+    //   let mime = arr[0].match(/:(.*?);/)[1]
+    //   let suffix = mime.split('/')[1]
+    //   let bstr = atob(arr[1])
+    //   let n = bstr.length
+    //   let u8arr = new Uint8Array(n)
+    //   while (n--) {
+    //     u8arr[n] = bstr.charCodeAt(n)
+    //   }
+    //   return new File([u8arr], `${filename}.${suffix}`, {
+    //     type: mime
+    //   })
+    // },
+    //  div  发送
+    sendMs(){
+      if(this.say!==''){
+        var ss = (this.say||"").split('<img src="data:image/png;base64,')
+        var ss2=(ss[1]||"").split('" alt="">')
+        var zd = "imgs*";
+        var zd2 = "imgend*";
+        // this.say = ss[0]+zd+ss2[0]+zd2+ss2[1]
+        if(ss2[0]==''){
+          this.say=ss[0]
+        }
+        var arr= [];
+        this.say = txt1 + txt2 
+        let that = this
+        let msg = new RongIMLib.TextMessage({ content: that.say, extra:'' });
+        let conversationType = RongIMLib.ConversationType.PRIVATE; // 单聊, 其他会话选择相应的消息类型即可
+        let targetId = that.targetMan
+      // let targetId = JSON.parse(localStorage.getItem('userInfo')).IMUser.assistantId; // 目标 Id
+        let groupId = targetId
+        let shopID= 1 
+        let bidType =0
+        // let createTime=that.nowTime
+        let ct = that.nowTime;
+        //  时间标准格式
+        // let createTime = ct.getFullYear()+'-'+(ct.getMonth()+1)+'-'+ct.getDate()+'T'+ct.getHours()+':'+ct.getMinutes()+':'+ct.getSeconds()
+        // 当前时间的时间戳
+        let createTime = new  Date().getTime()
+        let Content =""
+        let nickName=JSON.parse(localStorage.getItem('userInfo')).Nickname
+        let url = 'http://192.168.4.190:7777/api/WebIm/QuotedPrice/'
+        let params = { GroupID: groupId,Shop_ID: shopID ,User_ID: that.userId,BidType: bidType,Content: Content,NickName: nickName,CreatTimeStamp: createTime }
+        console.log(Content)
+             for (let index = 0; index < ss.length; index++) {
+            // console.log(ss[index])
+            if ((ss[index].indexOf('" alt="">')) == -1) {
+              // 输出结果 
+              var txt1 = ss[index]
+              txt1.replace("\n","")
+              if (txt1!="") {
+               params.CreatTimeStamp+=1
+               params.BidType = 0;
+               params.Content = txt1;
+               axios.post(url,qs.stringify(params),{
+                    headers:{
+                      'Content-Type': 'application/x-www-form-urlencoded',
+                    }
+               }).then(function(response){
+                 var data = response.data;
+                  console.log(data)
+                 console.log(" 文字>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+               }).catch(function(error){
+                 console.log(error)
+               })
+              }
+              // arr.push(ss[index])
+            }else{
+              var img2 = ss[index].split('" alt="">')[0]
+              var txt2 = ss[index].split('" alt="">')[1]
+              if (img2!="") {
+               params.CreatTimeStamp+=1
+               params.BidType = 1;
+               params.Content = img2;
+                       axios.post(url,qs.stringify(params),{
+                    headers:{
+                      'Content-Type': 'application/x-www-form-urlencoded',
+                    }
+               }).then(function(response){
+                 var data = response.data;
+                 img2 = JSON.parse(data).ReturnData.ImageAirUrl
+                  console.log(img2)
+                 console.log(" 图片>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+               }).catch(function(error){
+                 console.log(error)
+               })
+              }
+              let re = /(\n(?=(\n+)))+/g
+              txt2= txt2.replace("\n","")
+              if (txt2!="") {
+              params.CreatTimeStamp+=1
+              params.BidType = 0;
+              params.Content = txt2;
+              axios.post(url,qs.stringify(params),{
+                    headers:{
+                      'Content-Type': 'application/x-www-form-urlencoded',
+                    }
+               }).then(function(response){
+                 var data = response.data;
+                 console.log(data)
+                  console.log("文字 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+               }).catch(function(error){
+                 console.log(error)
+               })
+              }
+            }
+        }
+        arr.forEach((c,m)=>{
+
+        });
+            RongIMClient.getInstance().sendMessage(conversationType, targetId, msg, {
+                onSuccess: function (message) {
+                    // message 为发送的消息对象并且包含服务器返回的消息唯一 Id 和发送消息时间戳
+                    console.log('Send successfully',message,message.content.content);
+                    that.answer.push(message,message.content.content)
+                    that.say = ''
+                    that.toBottom();
+                },
+          onError: function (errorCode, message) {
+              let info = '';
+              switch (errorCode) {
+                  case RongIMLib.ErrorCode.TIMEOUT:
+                      info = '超时';
+                      break;
+                  case RongIMLib.ErrorCode.UNKNOWN:
+                      info = '未知错误';
+                      break;
+                  case RongIMLib.ErrorCode.REJECTED_BY_BLACKLIST:
+                      info = '在黑名单中，无法向对方发送消息';
+                      break;
+                  case RongIMLib.ErrorCode.NOT_IN_DISCUSSION:
+                      info = '不在讨论组中';
+                      break;
+                  case RongIMLib.ErrorCode.NOT_IN_GROUP:
+                      info = '不在群组中';
+                      break;
+                  case RongIMLib.ErrorCode.NOT_IN_CHATROOM:
+                      info = '不在聊天室中';
+                      break;
+              }
+              console.log('发送失败: ' + info + errorCode);
+          }
+      });
+       this.$refs.msg.innerHTML=''
+      if(this.say!==''){
+      console.log(this.say)
       if(!this.send){
         return false;
       }
+      }
+     }
+    },
+    // dingshi(){
+    //          setTimeout(() => {
+    //             this.isDisable = true;
+    //     }, 1000 * 5);
+    // },
+    //  textarea 发送
+    send() {
+      console.log(123)
+     if(this.say!==''){
       let that = this
       let msg = new RongIMLib.TextMessage({ content: that.say, extra:'' });
       let conversationType = RongIMLib.ConversationType.PRIVATE; // 单聊, 其他会话选择相应的消息类型即可
@@ -195,6 +428,7 @@ export default {
               that.answer.push(message,message.content.content)
               that.say = ''
               that.toBottom();
+              
           },
           onError: function (errorCode, message) {
               let info = '';
@@ -221,10 +455,19 @@ export default {
               console.log('发送失败: ' + info + errorCode);
           }
       });
+       this.$refs.msg.innerHTML=''
+      if(this.say!==''){
+      console.log(this.say)
+      if(!this.send){
+        return false;
+      }
+      }
+     }
+     console.log(this.say)
     },
     getChat(){ //获取会话列表
       let self=this;
-      self.chatList=null//获取前都先清空
+      self.chatList=''//获取前都先清空
       let conversationType = [RongIMLib.ConversationType.PRIVATE,RongIMLib.ConversationType.GROUP,RongIMLib.ConversationType.SYSTEM]; //先传单聊再传群聊,null值传所有
       let count=150;
       RongIMClient.getInstance().getConversationList({
@@ -319,7 +562,7 @@ export default {
             // console.log('群聊信息',response);
             if(response.status === 200){
                 groupInfoList =response.data.ReturnData
-                console.log(groupInfoList)
+                // console.log(groupInfoList)
                 charList.forEach(v=>{
                     groupInfoList.forEach(c=>{
                         let allUserList=JSON.parse(localStorage.getItem('allUserInfo'))
@@ -401,7 +644,7 @@ export default {
                         NickName:userInfo.NickName
                     }
                     userInfoList.push(ddd)
-                    console.log('新增',ddd)
+                    // console.log('新增',userInfoList)
                     let allUserList=JSON.parse(localStorage.getItem('allUserInfo'))
                     localStorage.setItem('allUserInfo',JSON.stringify(self.getUniques(allUserList,userInfoList)))
                     // localStorage.setItem('allUserInfo',JSON.stringify(userInfoList))
@@ -459,14 +702,16 @@ export default {
       }
       self.nowChat=d;
       self.targetMan=d.targetId
-      console.log(d)
+      // console.log(d.conversationType)
+      this.messageType=d.conversationType
+      // console.log(this.messageType)
       if(type&&type==1&&type==3){ //不加载记录，只是切换聊天框
         self.hisObj.forEach((v,i,a)=>{ //把对应的历史记录塞到对应对象中
           if(v.targetId==d.targetId){
               self.$store.state.answer=v.history
           }
-        }) 
-        self.toBottom();           
+        })
+        self.toBottom();
         return false
       }
         let conversationType=null
@@ -510,7 +755,7 @@ export default {
             onError: function(error) {
                 console.log('GetHistoryMessages, errorcode:' + error);
             }
-        });        
+        });
     },
     getChatRecord(){  //获取指定会话历史
       let conversationType = RongIMLib.ConversationType.PRIVATE; //单聊, 其他会话选择相应的消息类型即可
@@ -554,6 +799,9 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.active{
+  background: #eff4f7;
+ }
 .chatHeader{
   width: 100%;
   text-align: center;
@@ -562,7 +810,17 @@ export default {
   line-height:50px;
 }
 .btn{
-  top: 10px;
+  border: none;
+  border: 1px solid green;
+  color: green;
+  border-radius: 6px;
+  width: 56px;
+  height: 24px;
+  line-height: 22px;
+  cursor: pointer;
+  top: 6px;
+  left: 60px;
+  text-align: center;
   position: absolute;
 }
 .con{
@@ -591,7 +849,7 @@ export default {
 }
 .con-head-m{
   width: 50px;
-  margin-right:15px; 
+  margin-right:15px;
 }
 .con-head-t{
   color: white;
@@ -614,8 +872,8 @@ export default {
   width: 65px;
   height: 65px;
   background: lavender;
-  border-radius:50%; 
-  margin-top:20px; 
+  border-radius:50%;
+  margin-top:20px;
 }
 .chatList{
   width: 400px;
@@ -642,7 +900,7 @@ export default {
   border-radius:20px;
   text-indent: 10px;
   border: none;
-  outline: none; 
+  outline: none;
 
 }
 .chatRoom{
@@ -650,11 +908,11 @@ export default {
   height: 100%;
   background: white;
   position: relative;
-  box-sizing: border-box; 
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
 }
-.background-img{ 
+.background-img{
   width: 100%;
   height: 100%;
 }
@@ -669,17 +927,20 @@ export default {
   height: 150px;
   background: white;
   border: 2px solid #eee;
-  border-radius:5px; 
+  border-radius:5px;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
 }
 .inpTool{
+  position: relative;
   width: 100%;
   height: 34px;
   background: white;
 }
 .inpEnter{
+  
+  min-height: 17px;
   width: 100%;
   flex: 1;
   border: none;
@@ -699,15 +960,29 @@ export default {
   text-align: center;
   color: #999;
   font-size: 12px;
-  margin-top:5px; 
+  margin-top:5px;
 }
 .loadHistory-t{
   cursor: pointer;
 }
 .images{
   display:inline-block;
-  padding-left: 10px;
+  padding-left: 20px;
   padding-top: 4px;
+}
+#bgimg {
+    background-image: url('../assets/images/B1.png') no-repeat;
+    display: inline-block;
+    padding-left: 20px;
+    padding-top: 4px;
+}
+.img-textarea{
+   width: 100%;
+  flex: 1;
+  border: none;
+  outline: none;
+  padding:15px;
+  box-sizing: border-box;
 }
 </style>
 
