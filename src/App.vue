@@ -9,15 +9,26 @@ import Init from './components/Init.vue'
 import { mapState } from 'vuex'
 import { mapGetters } from 'vuex'
 import { mapMutations } from 'vuex'
+import axios from 'axios'
+import Global from "./common/Global";
 export default {
   name: 'app',
   components: {
     Init
   },
+  data(){
+    return{
+      token:'',
+      userInfo:[],
+      allUserInfo:[],
+      HeadPortrait:require('./assets/images/systemImg.png')
+    }
+  },
 created () { //生命周期函数-可发起求
     let that = this
     //融云初始化8w7jv4qb78a9y
     //自己的pvxdm17jpe59r
+
     RongIMLib.RongIMClient.init('pvxdm17jpe59r',); //------------------------------重要填写appkey
     that.beforeIm() //设置监听，必须先设置监听，再连接
     that.nowIm()  //连接融云
@@ -82,6 +93,8 @@ created () { //生命周期函数-可发起求
                       // message.content.content => 位置图片 base64
                       break;
                   case RongIMClient.MessageType.RichContentMessage:
+                       console.log('接受到图文的消息',message,message.content.content)
+                      that.$refs.mainPart.gotMsg(message) //全部消息放到组件中处理
                       // message.content.content => 文本消息内容
                       // message.content.imageUri => 图片 base64
                       // message.content.url => 原图 URL
@@ -112,45 +125,48 @@ created () { //生命周期函数-可发起求
     },
     nowIm(){
         const self=this;
+        self.Global.adminList.forEach(c=>{
+          let dd ={UserID:'',
+            HeadPortrait:self.HeadPortrait,
+            NickName:'系统消息'}
+          dd.UserID=c
+          self.allUserInfo.push(dd)
+      })
     //自己的token------从接口获取，写到缓存
-<<<<<<< HEAD
-     var chooseUser='';
-     var chooseUserToken='';
-     var user1=20000001;
-     var user2=2;
-     var user1Token='lFLCTdymLem/eleH16XcVGqWa1TUI8otXuWvIK0HUgo=@zeph.cn.rongnav.com;zeph.cn.rongcfg.com';
-     var user2Token='FDZatHEEaGj/TGampTkAyAZpwg7GPoPL@zeph.cn.rongnav.com;zeph.cn.rongcfg.com';
-     var a=confirm('确认是user1，取消是user2')
-     if(a){
-         chooseUser=user1;
-         chooseUserToken=user1Token;
-         localStorage.setItem("targetId",user2);
-     }else{
-         chooseUser=user2;
-         chooseUserToken=user2Token
-         localStorage.setItem("targetId",user1);
-     }
-=======
-      let userId = 2
+      let userId = 101
       let url = '/api/IM/getUserInfo/'+userId;
       axios.get(url).then(function (response) {
-        console.log("获取用户信息成功");
-        console.log(response);
+        console.log("获取当前用户信息成功",response);
         if(response.status === 200){
           //获得成功响应返回的数据
           let userInfo=response.data.ReturnData[0];
-          // console.log(userInfo.ry_token);
-          //将用户信息转化为字符串写入缓存
-          localStorage.setItem('userInfo',JSON.stringify(userInfo));
-          // console.log(JSON.parse(localStorage.getItem('userInfo')).ry_token);
+          if(response.data.ReturnTotalRecords===0){
+            Global.isTokenNull=true;
+          }
+            if(Global.isTokenNull){
+            console.log("token为空,请注册");
+          }else{
+            // console.log(userInfo.ry_token);
+            //将用户信息转化为字符串写入缓存
+            userInfo.HeadPortrait=decodeURIComponent(userInfo.HeadPortrait)
+            let dd={UserID:userInfo.UserId,
+              HeadPortrait:userInfo.HeadPortrait,
+              NickName:userInfo.Nickname
+            }
+            self.allUserInfo.push(dd)
+            localStorage.setItem('allUserInfo',JSON.stringify(self.allUserInfo))
+            localStorage.setItem('userInfo',JSON.stringify(userInfo));
+          }
         }
       }).catch(function (error) {
             console.log(error);
       });
->>>>>>> f1b151ef6e480dac4511b2ae8b9474b4686998ef
+
       // var token = JSON.parse(localStorage.getItem('userInfo')).IMUser.token//"WzrthC5f4UfuiI7dIwCQ5fwtGfqCdobpowIZkcQnj8PQOQuAJb/nIi1ayzGFwJguvbQZxbJH3x0=";
-      //lFLCTdymLem/eleH16XcVGqWa1TUI8otXuWvIK0HUgo=@zeph.cn.rongnav.com;zeph.cn.rongcfg.com
-      RongIMClient.connect(chooseUserToken, {
+      // var token = 'lFLCTdymLem/eleH16XcVGqWa1TUI8otXuWvIK0HUgo=@zeph.cn.rongnav.com;zeph.cn.rongcfg.com';
+      var ry_token = JSON.parse(localStorage.getItem('userInfo')).ry_token;
+      console.log(ry_token)
+      RongIMClient.connect(ry_token, {
           onSuccess: function(userId) {
               console.log('Connect successfully. ' + userId);
               self.$store.state.isConnect=true;
@@ -160,6 +176,7 @@ created () { //生命周期函数-可发起求
               console.log('token 无效');
           },
           onError: function(errorCode){
+
               var info = '';
               switch (errorCode) {
                   case RongIMLib.ErrorCode.TIMEOUT:
