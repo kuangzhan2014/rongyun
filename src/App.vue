@@ -30,6 +30,7 @@ created () { //生命周期函数-可发起求
     //自己的开发环境:pvxdm17jpe59r
     //生产环境:uwd1c0sxu5jt1
      //------------------------------重要填写appkey
+    RongIMLib.RongIMClient.init('uwd1c0sxu5jt1');
     that.beforeIm() //设置监听，必须先设置监听，再连接
     that.nowIm()  //连接融云
   },
