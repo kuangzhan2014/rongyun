@@ -9,7 +9,25 @@
            <div class="time">{{time}}</div>
          </div>
       </div>
-      <div class="left" v-if="data.messageType =='TextMessage'&&data.messageDirection!='1'">
+      <div class="right" v-if="data.messageType =='RichContentMessage'&&data.messageDirection=='1'">
+          <div class="right-head"><img class="right-head-img" :src="rightHeadImageUrl"></div>
+          <div class="right-con">
+              <div class="rightUserName">{{rightUserName}}</div>
+<!--              <div class="content">{{data.content.content}}</div>-->
+              <img :src=getThumbnail(data.content.imageUri) class="img" @click="getEnlargedView(data.content)">
+              <div class="time">{{time}}</div>
+          </div>
+      </div>
+      <div class="right" v-if="data.messageType =='ImageMessage'&&data.messageDirection=='1'">
+          <div class="right-head"><img class="right-head-img" :src="rightHeadImageUrl"></div>
+          <div class="right-con">
+              <div class="rightUserName">{{rightUserName}}</div>
+              <img :src=getThumbnail(data.content.imageUri) class="img1" @click="getEnlargedView(data.content)">
+              <div class="time">{{time}}</div>
+          </div>
+      </div>
+
+      <div class="left" v-if="data.messageType =='TextMessage'&&data.messageDirection=='2'">
          <div class="left-head"><img class="left-head-img" :src=getUserInfo(data.senderUserId).HeadPortrait></div>
          <div class="left-con">
            <div class="leftUserName">{{getUserInfo(data.senderUserId).NickName}}</div>
@@ -17,7 +35,33 @@
            <div class="time">{{time}}</div>
          </div>        
       </div>
-
+      <div class="left" v-if="data.messageType =='RichContentMessage'&&data.messageDirection=='2'">
+          <div class="left-head"><img class="left-head-img" :src=getUserInfo(data.senderUserId).HeadPortrait></div>
+          <div class="left-con">
+              <div class="leftUserName">{{getUserInfo(data.senderUserId).NickName}}</div>
+<!--              <div class="content">{{data.content.content}}</div>-->
+              <img :src=getThumbnail(data.content.imageUri) class="img" @click="getEnlargedView(data.content)">
+              <div class="time">{{time}}</div>
+          </div>
+      </div>
+      <div class="left" v-if="data.messageType =='ImageMessage'&&data.messageDirection=='2'">
+          <div class="left-head"><img class="left-head-img" :src=getUserInfo(data.senderUserId).HeadPortrait></div>
+          <div class="left-con">
+              <div class="leftUserName">{{getUserInfo(data.senderUserId).NickName}}</div>
+              <img :src=getThumbnail(data.content) class="img1" @click="getEnlargedView(data.content)" >
+              <div class="time">{{time}}</div>
+          </div>
+      </div>
+      <div class="left" v-if="data.messageType =='HQVoiceMessage'&&data.messageDirection=='2'">
+          <div class="left-head"><img class="left-head-img" :src=getUserInfo(data.senderUserId).HeadPortrait></div>
+          <div class="left-con">
+              <div class="leftUserName">{{getUserInfo(data.senderUserId).NickName}}</div>
+              <div class="voice">
+                  <img :src=vioceImg class="voiceImg" @click="getVoice(data.content)" ><span> {{data.content.duration}}</span>
+              </div>
+              <div class="time">{{time}}</div>
+          </div>
+      </div>
   </div>
 </template>
 
@@ -33,6 +77,7 @@ export default {
         rightHeadImageUrl:decodeURIComponent(JSON.parse(localStorage.getItem('userInfo')).HeadPortrait),
         // leftHeadImageUrl:require('../assets/images/person2.png'),
         // leftUserName:'用户名2'
+        vioceImg:require('../assets/images/voice.png')
     };
   },
   created() {
@@ -45,7 +90,21 @@ export default {
     getUserInfo(d){
         let userInfo=this.$parent.getUserInfo(d)
         return userInfo
-    }
+    },
+    getThumbnail(d){
+        if(this.data.messageType=='ImageMessage'){
+            // console.log(d.content)
+           let src='data:image/jpg;base64,'+d.content
+            // console.log('src='+src)
+            return  src
+        }else{
+            return d.imageUri
+        }
+     },
+     getEnlargedView(d){
+
+     },
+     getVoice(){}
   }
 };
 </script>
@@ -122,6 +181,22 @@ export default {
     margin-right:15px;
     margin-left:15px;
     word-break: break-all;
+}
+.img{
+    width: 100%;
+    height: 100%;
+}
+.img1{
+    max-width: 300px;
+    max-height: 300px;
+}
+.voice{
+    background-color: #0FAF17;
+    color: white;
+}
+.voiceImg{
+    width: 30px;
+    height: 30px;
 }
 </style>
 

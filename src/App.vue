@@ -27,9 +27,9 @@ export default {
 created () { //生命周期函数-可发起求
     let that = this
     //融云初始化8w7jv4qb78a9y
-    //自己的pvxdm17jpe59r
-
-    RongIMLib.RongIMClient.init('pvxdm17jpe59r',); //------------------------------重要填写appkey
+    //自己的开发环境:pvxdm17jpe59r
+    //生产环境:uwd1c0sxu5jt1
+     //------------------------------重要填写appkey
     that.beforeIm() //设置监听，必须先设置监听，再连接
     that.nowIm()  //连接融云
   },
@@ -82,19 +82,25 @@ created () { //生命周期函数-可发起求
                       // that.getAnswer(message)
                       break;
                   case RongIMClient.MessageType.VoiceMessage:
+                    console.log('接受到的语音消息',message,message.content.content)
+                    that.$refs.mainPart.gotMsg(message) //全部消息放到组件中处理
                       // message.content.content => 格式为 AMR 的音频 base64
                       break;
                   case RongIMClient.MessageType.ImageMessage:
+                    console.log('接受到的图片消息',message,message.content.content)
+                    that.$refs.mainPart.gotMsg(message) //全部消息放到组件中处理
                       // message.content.content => 图片缩略图 base64
                       // message.content.imageUri => 原图 URL
                       break;
                   case RongIMClient.MessageType.LocationMessage:
+                    console.log('接受到的地址消息',message,message.content.content)
+                    that.$refs.mainPart.gotMsg(message) //全部消息放到组件中处理
                       // message.content.latiude => 纬度
                       // message.content.longitude => 经度
                       // message.content.content => 位置图片 base64
                       break;
                   case RongIMClient.MessageType.RichContentMessage:
-                       console.log('接受到图文的消息',message,message.content.content)
+                       console.log('接受到的图文消息',message,message.content.content)
                       that.$refs.mainPart.gotMsg(message) //全部消息放到组件中处理
                       // message.content.content => 文本消息内容
                       // message.content.imageUri => 图片 base64
@@ -166,7 +172,7 @@ created () { //生命周期函数-可发起求
       // var token = JSON.parse(localStorage.getItem('userInfo')).IMUser.token//"WzrthC5f4UfuiI7dIwCQ5fwtGfqCdobpowIZkcQnj8PQOQuAJb/nIi1ayzGFwJguvbQZxbJH3x0=";
       // var token = 'lFLCTdymLem/eleH16XcVGqWa1TUI8otXuWvIK0HUgo=@zeph.cn.rongnav.com;zeph.cn.rongcfg.com';
       var ry_token = JSON.parse(localStorage.getItem('userInfo')).ry_token;
-      console.log(ry_token)
+      // console.log(ry_token)
       RongIMClient.connect(ry_token, {
           onSuccess: function(userId) {
               console.log('Connect successfully. ' + userId);

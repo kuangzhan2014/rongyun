@@ -12,7 +12,7 @@
         <span class="coc-b21-2">{{sendTime}}</span>
       </div>
       <div class="coc-b22">
-        {{`${getUserInfo(detail.latestMessage.senderUserId)}说`}}：{{detail.latestMessage.content.content}}
+        {{`${getUserInfo(detail.latestMessage.senderUserId)}`}}：{{getContent(detail.latestMessage)}}
       </div>
     </div>
   </div>
@@ -71,8 +71,33 @@ export default {
       // console.log(this.detail.latestMessage.senderUserId)
       let userInfo=this.$parent.getUserInfo(id)
       return userInfo.NickName
-      // return  this._self.$parent.getUserInfo(id).ConversationName
-      // this.$emit('getUserInfo',id);
+    },
+    getContent(d){
+         let content=''
+      switch (d.messageType) {
+         case 'TextMessage':
+           content=d.content.content
+         break;
+         case 'RichContentMessage':
+           if(d.content.content.imageUri!=null){
+             content='[图片]'
+           }else{
+             content=d.content.content.content
+           }
+         break;
+         case 'ImageMessage':
+           content='[图片]'
+           break;
+         case 'HQVoiceMessage':
+           content='[语音]'
+           break;
+         case "SightMessage":
+           content='[小视频]'
+           break;
+        default:
+          break;
+      }
+      return content
     }
   },
 }

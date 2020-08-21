@@ -562,7 +562,7 @@ export default {
             // console.log('群聊信息',response);
             if(response.status === 200){
                 groupInfoList =response.data.ReturnData
-                // console.log(groupInfoList)
+                console.log(groupInfoList)
                 charList.forEach(v=>{
                     groupInfoList.forEach(c=>{
                         let allUserList=JSON.parse(localStorage.getItem('allUserInfo'))
